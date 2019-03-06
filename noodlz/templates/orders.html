@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Developer Monday</title>
+	<link rel="stylesheet" href="/static/style.css" />
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+<body>
+	<div id="content">
+		<section>
+			<header>
+				<h2 class="destination">{{ destinations[destination]["title"]}}</h2>
+				<span class="date">{{ date }}</span>
+			</header>
+			<div class="orders">
+			{% for order in orders %}
+				{% set item_data = destinations[destination]["options"][order["order"]] %}
+				<div class="order">
+				{% if "id" in item_data %}
+					<span class="id">{{ item_data["id"] }}</span>
+				{% endif %}
+					<span class="item">{{ item_data["title"] }}</span>
+					<ul class="options">{% for option in item_data.get("options", []) %}
+						<li>{{ option }}</li>
+					{% endfor %}</ul>
+					<div class="right">
+						<span class="order-count">{{ order["count"] }}</span>
+					</div>
+				</div>
+			{% endfor %}
+			</div>
+			<footer>
+			</footer>
+		</section>
+	</div>
+</body>
+</html>

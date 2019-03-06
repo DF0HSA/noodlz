@@ -1,0 +1,34 @@
+pkgname=noodlz
+pkgver=1.0
+pkgrel=1
+pkgdesc="Noodlz Webapp"
+arch=('any')
+license=('AGPL3')
+depends=('python' 'python-flask' 'gunicorn')
+makedepends=('python-setuptools')
+install='noodlz.install'
+backup=("etc/noodlz.cfg")
+
+source=("git+file:///home/tobyp/noodlz"
+        "noodlz.cfg"
+        "noodlz.install"
+        "noodlz.service"
+        "noodlz.sysusers"
+        "noodlz.tmpfiles"
+)
+
+sha512sums=('SKIP'
+            '81897902fd413f4ac585c61a6824bca99bb73dc1baa448846b180c8c715330c0036833abd95aadbcdf83199ce363e8ec7f309f347a4e20ecd4f6b28fc46a0a2d'
+            '5613f3363c777aac3c1a12f6479240defc486c3375ac9b7ab39c8395ba31af29d4f8f91ab9ff7032644ea9d9ff89fb6bdd4731a436b07d3b07f83e4a4eaf7d7f'
+            '212c96b2cbe203eab14d5f236fb1f6c82da9d95150962c491d4beedf9568c8be56073160e46f501282f39c1fbc34685fdfc4c850d40386138f4e6ac9aafd7383'
+            'dd7e05467eb00910f0e187a01cd87e1d1477ce531b59fd36a82ebfc67ab6fbea8e0f32a7a6b43305fc6f2d73ba989e212949cb41227c866cce09e086509232c3'
+            'b8944818be277597fa90431d9d88ca9c9b0e2b8b4ac591d338a499b01578c501db5190dda851aec9540273b5dccc98b3034e0b939829f2545653aed1bc89741f')
+
+package() {
+	cd "${srcdir}/${pkgname}"
+	python3 setup.py install --root="${pkgdir}" --optimize=1
+	install -Dm400 "${srcdir}/noodlz.cfg" "${pkgdir}/etc/noodlz.cfg"
+	install -Dm644 "${srcdir}/noodlz.service" "${pkgdir}/usr/lib/systemd/system/noodlz.service"
+	install -Dm644 "${srcdir}/noodlz.sysusers" "${pkgdir}/usr/lib/sysusers.d/noodlz.conf"
+	install -Dm644 "${srcdir}/noodlz.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/noodlz.conf"
+}

@@ -1,0 +1,6 @@
+*.json
+noodlz.cfg
+__pycache__/
+*.egg-info/
+build/
+dist/

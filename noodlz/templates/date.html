@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Developer Monday</title>
+	<link rel="stylesheet" href="/static/style.css" />
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+<body>
+	<div id="content">
+		<section class="header">
+			<header>
+				<h1>Developer Monday</h1>
+				<span class="date">{{ date }}</span>
+				<div class="right">
+					<span class="user">{{ user }}</span>
+					<form><button formmethod="POST" formaction="/logout?date={{ date }}" type="submit" title="Logout"><i class="fas fa-sign-out-alt"></i></button></form>
+				</div>
+			</header>
+		</section>
+	{% for trip in trips %}
+		{% set trip_i = loop.index - 1 %}
+		{% set destination_data = destinations[trip["destination"]] %}
+		{% set trip_orders = my_orders[trip_i] %}
+		<section class="trip {% if trip.get('closed', False) %}closed{% endif %}">
+			<form>
+				<header>
+					<h2 class="destination">{{ destinations[trip["destination"]]["title"]}}</h2>
+					<span class="person">{{ trip["user"] }}</span>
+				{% if trip["user"] == user %}
+					<div class="right">
+					{% if not trip.get("closed", False) %}
+						<button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Bestellschluss"><i class="fas fa-fw fa-shopping-cart"></i>Bestellschluss & Einkaufsliste</button>
+					{% else %}
+						<button formmethod="GET" formaction="trip/{{ trip_i }}" title="Einkaufsliste"><i class="fas fa-fw fa-shopping-cart"></i>Einkaufsliste</button>
+					{% endif %}
+					</div>
+				{% endif %}
+				</header>
+			</form>
+			<form>
+				<div class="orders">
+				{% for item, item_data in destination_data["options"].items() %}
+					<div class="order {% if trip_orders.get(item, 0) > 0 %}nonzero{% else %}zero{% endif %}">
+					{% if "id" in item_data %}
+						<span class="id">{{ item_data["id"] }}</span>
+					{% endif %}
+						<span class="item">{{ item_data["title"] }}</span>
+						<ul class="options">{% for option in item_data.get("options", []) %}
+							<li>{{ option }}</li>
+						{% endfor %}</ul>
+						<div class="right">
+							<span class="price">&euro; {{ "%.2f"|format(item_data["price"]) }}</span>
+						{% if trip.get("closed", False) %}
+							<span class="order-count">{{ trip_orders.get(item, 0) }}</span>
+						{% else %}
+							<input class="order-count" type="number" name="item-{{ item }}" min="0" value="{{ trip_orders.get(item, 0) }}" />
+						{% endif %}
+						</div>
+					</div>
+				{% endfor %}
+				</div>
+				<footer>
+					<div class="right">
+					{% if trip.get("closed", False) %}
+						<span class="note"><i class="fas fa-fw fa-lock"></i> Die Bestellung ist geschlossen.</span>
+					{% else %}
+						<button type="submit" formmethod="POST" formaction="trip/{{ trip_i }}/order" title="Bestellung aufgeben"><i class="fas fa-fw fa-plus"></i>Bestellung aufgeben</button>
+					{% endif %}
+					</div>
+				</footer>
+			</form>
+		</section>
+	{% else %}
+	<section>
+		<header>
+			<p>Nobody's going anywhere yet. Add a trip below!</p>
+		</header>
+	</section>
+	{% endfor %}
+		<section class="trip">
+			<form>
+				<footer>
+					<select name="destination">
+					{% for destination, destination_data in destinations.items() %}
+						<option value="{{ destination }}">{{ destination_data["title"] }}</option>
+					{% endfor %}
+					</select>
+					<div class="right">
+						<button type="submit" formmethod="POST" formaction="trip" value="Add Trip"><i class="fas fa-fw fa-plus"></i>Trip Hinzufügen</button>
+					</div>
+				</footer>
+			</form>
+		</section>
+	<div>
+</body>
+</html>

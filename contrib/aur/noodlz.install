@@ -1,0 +1,4 @@
+post_install() {
+	sed -i "s#%LONG_RANDOM_STRING%#$(dd if=/dev/urandom bs=48 count=1 2>/dev/null | base64)#" /etc/noodlz.cfg
+	echo "Add some destinations in /var/lib/noodlz/destinations.json to get started!"
+}

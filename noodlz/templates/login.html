@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Developer Monday</title>
+	<link rel="stylesheet" href="/static/style.css" />
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+<body>
+	<div id="content">
+		<section>
+			<form action="/login?date={{ date }}" method="POST">
+				<header>
+					<h1>Who are you?</h1>
+				</header>
+				<div class="order login">
+					<input type="text" placeholder="Enter a Name" name="user" />
+				</div>
+				<footer>
+					<div class="right">
+						<button type="submit" value="Continue" /><i class="fas fa-fw fa-sign-in-alt"></i> Sign In</button>
+					</div>
+				</footer>
+			</form>
+		</section>
+	</div>
+</body>
+</html>

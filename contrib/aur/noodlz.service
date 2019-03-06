@@ -1,0 +1,30 @@
+[Unit]
+Description="Noodlz Webapp"
+
+[Service]
+User=noodlz
+Group=noodlz
+Environment=NOODLZ_SETTINGS=/etc/noodlz.cfg
+ExecStart=/usr/bin/gunicorn -w 4 noodlz:app
+
+CapabilityBoundingSet=
+NoNewPrivileges=True
+PrivateUsers=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectHome=true
+ProtectSystem=strict
+ProtectControlGroups=yes
+ProtectKernelTunables=true
+ProtectKernelModules=true
+StateDirectory=noodlz
+ReadOnlyPaths=/etc/noodlz.cfg
+LockPersonality=true
+MemoryDenyWriteExecute=true
+RestrictRealtime=true
+SystemCallArchitectures=native
+SystemCallFilter=@system-service
+
+
+[Install]
+WantedBy=multi-user.target

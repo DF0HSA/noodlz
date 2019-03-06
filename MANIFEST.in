@@ -1,0 +1,3 @@
+graft noodlz/static
+graft noodlz/templates
+global-exclude *.pyc
