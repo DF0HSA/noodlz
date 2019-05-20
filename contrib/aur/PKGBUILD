@@ -1,5 +1,5 @@
 pkgname=noodlz
-pkgver=1.0
+pkgver=1.0.1
 pkgrel=1
 pkgdesc="Noodlz Webapp"
 arch=('any')

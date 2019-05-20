@@ -1,0 +1,28 @@
+{
+	"dst1": {
+		"title": "Destination 1",
+		"options": {
+			"opt1": {
+				"id": "1",
+				"title": "Option 1",
+				"options": ["Detail 1", "Detail 2"],
+				"price": 13.37
+			},
+			"opt2": {
+				"id": "2",
+				"title": "Option 2",
+				"options": ["Detail 1"],
+				"price": 4.20
+			}
+		}
+	},
+	"dst2": {
+		"title": "Destination 2",
+		"options": {
+			"opt3": {
+				"title": "Option 3",
+				"price": 1.00
+			}
+		}
+	}
+}

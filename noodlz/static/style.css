@@ -130,18 +130,38 @@ section.trip.closed div.order {
 section.trip.closed div.order.zero {
 	display: none;
 }
-ul.options li {
+ul li {
 	display: inline-block;
-	background: var(--accent-lighten-4);
 	border-radius: 1.6ex;
 	padding: 0.3ex 1.2ex;
 	margin: 0 1px;
+}
+ul.options li {
+	background: var(--accent-lighten-4);
+}
+ul.users {
+	margin-left: auto;
+}
+ul.users li {
+	background: var(--accent-darken-4);
+	color: var(--main-lighten-5);
 }
 div.right {
 	margin-left: auto;
 	display: inherit;
 	flex-direction: inherit;
 	align-items: inherit;
+}
+span.order-count {
+	margin-right: 1em;
+}
+span.order-count:after {
+	content: '\00d7';
+	color: var(--main-darken-1);
+	margin-left: 1px;
+}
+span.id:before {
+	content: '#';
 }
 
 @media only screen and (max-width: 600px) {

@@ -19,6 +19,8 @@ def reload():
 	global DESTINATIONS
 	if not os.path.isdir(DATA_DIR):
 		os.mkdir(DATA_DIR)
+	if not os.path.isdir(DATA_DIR + "/trips"):
+		os.mkdir(DATA_DIR + "/trips")
 	try:
 		with open(os.path.join(DATA_DIR, "destinations.json"), "r") as f:
 			DESTINATIONS = json.load(f)
@@ -190,14 +192,20 @@ def get_orders(date, trip_id):
 
 	orders = {}
 	for order in trip.get("orders", []):
-		orders.setdefault(order["order"], 0)
-		orders[order["order"]] += 1
-	orders = [{"order": k, "count": v} for k, v in orders.items()]
-
+		order_item = order["order"]
+		if order_item in orders:
+			order_element = orders[order_item]
+		else:
+			order_element = orders.setdefault(order_item, {"order": order_item, "count": 0, "users": []})
+		order_element["count"] += 1
+		order_element["users"].append(order["user"])
+	order_list = list(sorted(orders.values(), key=lambda o: o["order"]))
 	return render_template("orders.html",
 		user=session["user"],
 		date=date,
-		orders=orders,
+		trip_id=trip_id,
+		orders=order_list,
+		show_users="users" in request.args,
 		destination=trip["destination"],
 		destinations=DESTINATIONS,
 	)
