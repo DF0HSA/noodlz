@@ -32,9 +32,8 @@
 					<div class="right">
 					{% if not trip.get("closed", False) %}
 						<button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Bestellschluss"><i class="fas fa-fw fa-shopping-cart"></i>Bestellschluss & Einkaufsliste</button>
-					{% else %}
-						<button formmethod="GET" formaction="trip/{{ trip_i }}" title="Einkaufsliste"><i class="fas fa-fw fa-shopping-cart"></i>Einkaufsliste</button>
 					{% endif %}
+						<button formmethod="GET" formaction="trip/{{ trip_i }}" title="Einkaufsliste"><i class="fas fa-fw fa-shopping-cart"></i>Einkaufsliste</button>
 					</div>
 				{% endif %}
 				</header>
