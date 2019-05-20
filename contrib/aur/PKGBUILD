@@ -9,7 +9,7 @@ makedepends=('python-setuptools')
 install='noodlz.install'
 backup=("etc/noodlz.cfg")
 
-source=("git+file:///home/tobyp/noodlz"
+source=("git+https://github.com/df0hsa/noodlz.git"
         "noodlz.cfg"
         "noodlz.install"
         "noodlz.service"
