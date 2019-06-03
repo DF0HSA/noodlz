@@ -65,7 +65,7 @@
 					{% if trip.get("closed", False) %}
 						<span class="note"><i class="fas fa-fw fa-lock"></i> Die Bestellung ist geschlossen.</span>
 					{% else %}
-						<button type="submit" formmethod="POST" formaction="trip/{{ trip_i }}/order" title="Bestellung aufgeben"><i class="fas fa-fw fa-plus"></i>Bestellung aufgeben</button>
+						<button type="submit" formmethod="POST" formaction="trip/{{ trip_i }}/order" title="Bestellung aufgeben"><i class="fas fa-fw fa-check"></i>Bestellung aufgeben</button>
 					{% endif %}
 					</div>
 				</footer>
