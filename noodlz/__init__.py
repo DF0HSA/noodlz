@@ -139,6 +139,7 @@ def get_date(date):
 		date=date,
 		trips=trips,
 		my_orders=my_orders,
+		order_accepted="order_accepted" in request.args,
 		destinations=DESTINATIONS,
 	)
 
@@ -156,7 +157,7 @@ def post_order(date, trip_id):
 			item = item.replace("item-", "", 1)
 			trip["orders"] = list(update_orders(trip.get("orders", []), session["user"], item, int(count)))
 	save_trips(date, trips)
-	return redirect(url_for("get_date", date=date))
+	return redirect(url_for("get_date", date=date, order_accepted=True))
 
 
 @app.route("/<date>/trip/<int:trip_id>/close", methods=["POST"])

@@ -115,6 +115,11 @@ section header,footer,div.order {
 	align-items: baseline;
 	padding: 0.5ex;
 }
+div.well {
+	background-color: var(--accent-lighten-3);
+	color: var(--main-darken-4);
+	padding: 1ex 0.5ex;
+}
 div.orders {
 	display: flex;
 	flex-direction: column;
