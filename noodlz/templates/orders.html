@@ -10,18 +10,21 @@
 <body>
 	<div id="content">
 		<section>
-			<form>
-				<header>
-					<h2 class="destination">{{ destinations[destination]["title"]}}</h2>
-					<span class="date">{{ date }}</span>
-					<div class="right">
+			<header>
+				<h2 class="destination">{{ destinations[destination]["title"]}}</h2>
+				<span class="date">{{ date }}</span>
+				<div class="right">
+					<form>
+						<button formmethod="GET" formaction="{{trip_id}}/bills" title="Abrechnung"><i class="fas fa-money-bill-wave"></i></button>
+					</form>
+					<form>
 					{% if not show_users %}
 						<input type="hidden" name="users" />
 					{% endif %}
-						<button formaction="#" formmethod="GET"><i class="fa fa-fw {% if show_users %}fa-user-slash{% else %}fa-user{% endif %}"></i></button>
-					</div>
-				</header>
-			</form>
+						<button formaction="#" formmethod="GET"><i class="fas {% if show_users %}fa-user-slash{% else %}fa-user{% endif %}"></i></button>
+					</form>
+				</div>
+			</header>
 			<div class="orders">
 			{% for order in orders %}
 				{% set item_data = destinations[destination]["options"][order["order"]] %}
@@ -35,9 +38,11 @@
 						<li>{{ option }}</li>
 					{% endfor %}</ul>
 					{% if show_users %}
-					<ul class="users">{% for user in order.get("users", []) %}
-						<li class="user">{{ user }}</li>
-					{% endfor %}</ul>
+					<div class="right">
+						<ul class="users">{% for user in order.get("users", []) %}
+							<li class="user">{{ user }}</li>
+						{% endfor %}</ul>
+					</div>
 					{% endif %}
 				</div>
 			{% endfor %}

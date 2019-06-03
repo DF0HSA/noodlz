@@ -24,20 +24,22 @@
 		{% set destination_data = destinations[trip["destination"]] %}
 		{% set trip_orders = my_orders[trip_i] %}
 		<section class="trip {% if trip.get('closed', False) %}closed{% endif %}">
-			<form>
-				<header>
-					<h2 class="destination">{{ destinations[trip["destination"]]["title"]}}</h2>
-					<span class="person">{{ trip["user"] }}</span>
-				{% if trip["user"] == user %}
-					<div class="right">
-					{% if not trip.get("closed", False) %}
-						<button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Bestellschluss"><i class="fas fa-fw fa-shopping-cart"></i>Bestellschluss & Einkaufsliste</button>
+			<header>
+				<h2 class="destination">{{ destinations[trip["destination"]]["title"]}}</h2>
+				<span class="person">{{ trip["user"] }}</span>
+				<div class="right">
+				{% if not trip.get("closed", False) %}
+					{% if trip["user"] == user %}
+						<form><button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Bestellschluss"><i class="fas fa-fw fa-shopping-cart"></i>Bestellschluss</button></form>
 					{% endif %}
-						<button formmethod="GET" formaction="trip/{{ trip_i }}" title="Einkaufsliste"><i class="fas fa-fw fa-shopping-cart"></i>Einkaufsliste</button>
-					</div>
+				{% else %}
+					{% if trip["user"] == user %}
+						<form><button formmethod="GET" formaction="trip/{{ trip_i }}" title="Einkaufsliste"><i class="fas fa-fw fa-shopping-cart"></i>Einkaufsliste</button></form>
+					{% endif %}
+					<form><button formmethod="GET" formaction="trip/{{ trip_i }}/bills" title="Abrechnung"><i class="fas fa-fw fa-money-bill-wave"></i>Abrechnung</button></form>
 				{% endif %}
-				</header>
-			</form>
+				</div>
+			</header>
 			<form>
 				<div class="orders">
 				{% for item, item_data in destination_data["options"].items() %}

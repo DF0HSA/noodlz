@@ -213,3 +213,48 @@ def get_orders(date, trip_id):
 		destinations=DESTINATIONS,
 		total=total,
 	)
+
+
+@app.route("/<date>/trip/<int:trip_id>/bills")
+@require_user
+def get_bills(date, trip_id):
+	date, trips = load_trips(date)
+	trip = trips[trip_id]
+	destination_menu = DESTINATIONS[trip["destination"]]["options"]
+
+	def concerns(order):
+		return session["user"] == trip["user"] or session["user"] == order["user"]
+
+	orders = [o for o in trip.get("orders", []) if concerns(o)]
+	return render_template("bills.html",
+		user=session["user"],
+		date=date,
+		trip_id=trip_id,
+		is_owner=session["user"] == trip["user"],
+		orders=orders,
+		destination=trip["destination"],
+		destinations=DESTINATIONS,
+	)
+
+
+@app.route("/<date>/trip/<int:trip_id>/bills", methods=["POST"])
+@require_user
+def post_bills(date, trip_id):
+	date, trips = load_trips(date)
+	trip = trips[trip_id]
+
+	if session["user"] != trip["user"]:
+		abort(403, "You can't read settle someone else's bills.")
+
+	# forms only send checkboxes that are on
+	for order in trip["orders"]:
+		order.pop("paid", None)
+
+	for order, paid in request.form.to_dict().items():
+		if order.startswith("order-"):
+			order_i = int(order.replace("order-", "", 1))
+			print(order, paid)
+			trip["orders"][order_i].update(paid=paid == "on")
+
+	save_trips(date, trips)
+	return redirect(url_for("get_bills", date=date, trip_id=trip_id, payment_accepted=True))

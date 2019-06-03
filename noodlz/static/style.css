@@ -144,9 +144,6 @@ ul li {
 ul.options li {
 	background: var(--accent-lighten-4);
 }
-ul.users {
-	margin-left: auto;
-}
 ul.users li {
 	background: var(--accent-darken-4);
 	color: var(--main-lighten-5);
@@ -167,6 +164,13 @@ span.order-count:after {
 }
 span.id:before {
 	content: '#';
+}
+input[type="checkbox"] {
+	margin-left: -1ex;
+	margin-right: -1ex;
+}
+i.fa-fw {
+	margin-right: 0.5ex;
 }
 
 @media only screen and (max-width: 600px) {
