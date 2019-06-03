@@ -186,6 +186,7 @@ def post_trip(date):
 def get_orders(date, trip_id):
 	date, trips = load_trips(date)
 	trip = trips[trip_id]
+	destination_menu = DESTINATIONS[trip["destination"]]["options"]
 
 	if session["user"] != trip["user"]:
 		abort(403, "You can't read someone else's order list.")
@@ -200,6 +201,7 @@ def get_orders(date, trip_id):
 		order_element["count"] += 1
 		order_element["users"].append(order["user"])
 	order_list = list(sorted(orders.values(), key=lambda o: o["order"]))
+	total = sum(destination_menu[o["order"]]["price"] * o["count"] for o in order_list)
 	return render_template("orders.html",
 		user=session["user"],
 		date=date,
@@ -208,4 +210,5 @@ def get_orders(date, trip_id):
 		show_users="users" in request.args,
 		destination=trip["destination"],
 		destinations=DESTINATIONS,
+		total=total,
 	)

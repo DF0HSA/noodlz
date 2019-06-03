@@ -26,8 +26,8 @@
 			{% for order in orders %}
 				{% set item_data = destinations[destination]["options"][order["order"]] %}
 				<div class="order">
-				{% if "id" in item_data %}
 					<span class="order-count">{{ order["count"] }}</span>
+				{% if "id" in item_data %}
 					<span class="id">{{ item_data["id"] }}</span>
 				{% endif %}
 					<span class="item">{{ item_data["title"] }}</span>
@@ -43,6 +43,9 @@
 			{% endfor %}
 			</div>
 			<footer>
+				<div class="right">
+					Summe: <span class="price">&euro; {{ "%.2f"|format(total) }}</span>
+				</div>
 			</footer>
 		</section>
 	</div>
