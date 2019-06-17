@@ -6,6 +6,7 @@ import os.path
 
 from flask import Flask, url_for, redirect, request, render_template, session, abort
 
+__version__ = "1.0.2"
 
 app = Flask(__name__)
 app.config.from_envvar('NOODLZ_SETTINGS')
@@ -75,7 +76,7 @@ def require_user(f):
 	@functools.wraps(f)
 	def wrapper(*args, **kwargs):
 		if 'user' not in session:
-			return render_template('login.html', **kwargs)
+			return render_template('login.html', version=__version__, **kwargs)
 		else:
 			return f(*args, **kwargs)
 	return wrapper
@@ -125,7 +126,7 @@ def get_reload():
 def get_date(date):
 	date, trips = load_trips(date, True)
 	if datetime.datetime.strptime(date, "%Y-%m-%d").weekday() != 0:
-		return render_template("notmonday.html")
+		return render_template("notmonday.html", version=__version__)
 
 	my_orders = [{} for _ in trips]
 	for trip_i, trip in enumerate(trips):
@@ -141,6 +142,7 @@ def get_date(date):
 		my_orders=my_orders,
 		order_accepted="order_accepted" in request.args,
 		destinations=DESTINATIONS,
+		version=__version__
 	)
 
 
