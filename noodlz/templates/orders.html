@@ -15,13 +15,13 @@
 				<span class="date">{{ date }}</span>
 				<div class="right">
 					<form>
-						<button formmethod="GET" formaction="{{trip_id}}/bills" title="Abrechnung"><i class="fas fa-money-bill-wave"></i></button>
+						<button formmethod="GET" formaction="{{trip_id}}/bills" title="Settle"><i class="fas fa-money-bill-wave"></i></button>
 					</form>
 					<form>
 					{% if not show_users %}
 						<input type="hidden" name="users" />
 					{% endif %}
-						<button formaction="#" formmethod="GET"><i class="fas {% if show_users %}fa-user-slash{% else %}fa-user{% endif %}"></i></button>
+						<button formaction="#" formmethod="GET" title="{% if show_users %}Hide Users{% else %}Show Users{% endif %}"><i class="fas {% if show_users %}fa-user-slash{% else %}fa-user{% endif %}"></i></button>
 					</form>
 				</div>
 			</header>
@@ -49,7 +49,7 @@
 			</div>
 			<footer>
 				<div class="right">
-					Summe: <span class="price">&euro; {{ "%.2f"|format(total) }}</span>
+					Total: <span class="price">&euro; {{ "%.2f"|format(total) }}</span>
 				</div>
 			</footer>
 		</section>

@@ -30,13 +30,13 @@
 				<div class="right">
 				{% if not trip.get("closed", False) %}
 					{% if trip["user"] == user %}
-						<form><button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Bestellschluss"><i class="fas fa-fw fa-shopping-cart"></i>Bestellschluss</button></form>
+						<form><button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
 					{% endif %}
 				{% else %}
 					{% if trip["user"] == user %}
-						<form><button formmethod="GET" formaction="trip/{{ trip_i }}" title="Einkaufsliste"><i class="fas fa-fw fa-shopping-cart"></i>Einkaufsliste</button></form>
+						<form><button formmethod="GET" formaction="trip/{{ trip_i }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
 					{% endif %}
-					<form><button formmethod="GET" formaction="trip/{{ trip_i }}/bills" title="Abrechnung"><i class="fas fa-fw fa-money-bill-wave"></i>Abrechnung</button></form>
+					<form><button formmethod="GET" formaction="trip/{{ trip_i }}/bills" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button></form>
 				{% endif %}
 				</div>
 			</header>
@@ -70,9 +70,9 @@
 				<footer>
 					<div class="right">
 					{% if trip.get("closed", False) %}
-						<span class="note"><i class="fas fa-fw fa-lock"></i> Die Bestellung ist geschlossen.</span>
+						<span class="note"><i class="fas fa-fw fa-lock"></i> This trip is closed.</span>
 					{% else %}
-						<button type="submit" formmethod="POST" formaction="trip/{{ trip_i }}/order" title="Bestellung aufgeben"><i class="fas fa-fw fa-check"></i>Bestellung aufgeben</button>
+						<button type="submit" formmethod="POST" formaction="trip/{{ trip_i }}/order" title="Order"><i class="fas fa-fw fa-check"></i>Order</button>
 					{% endif %}
 					</div>
 				</footer>
@@ -94,7 +94,7 @@
 					{% endfor %}
 					</select>
 					<div class="right">
-						<button type="submit" formmethod="POST" formaction="trip" value="Add Trip"><i class="fas fa-fw fa-plus"></i>Trip Hinzufügen</button>
+						<button type="submit" formmethod="POST" formaction="trip" value="Add Trip"><i class="fas fa-fw fa-plus"></i>Add Trip</button>
 					</div>
 				</footer>
 			</form>
