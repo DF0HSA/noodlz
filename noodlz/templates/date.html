@@ -28,14 +28,13 @@
 				<h2 class="destination">{{ destinations[trip["destination"]]["title"]}}</h2>
 				<span class="person">{{ trip["user"] }}</span>
 				<div class="right">
-				{% if not trip.get("closed", False) %}
-					{% if trip["user"] == user %}
-						<form><button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
-					{% endif %}
-				{% else %}
-					{% if trip["user"] == user %}
-						<form><button formmethod="GET" formaction="trip/{{ trip_i }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
-					{% endif %}
+				{% if trip["user"] == user %}
+					<form><button formmethod="GET" formaction="trip/{{ trip_i }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
+				{% endif %}
+				{% if trip["user"] == user and not trip.get("closed", False) %}
+					<form><button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
+				{% endif %}
+				{% if trip.get("closed", False) %}
 					<form><button formmethod="GET" formaction="trip/{{ trip_i }}/bills" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button></form>
 				{% endif %}
 				</div>
