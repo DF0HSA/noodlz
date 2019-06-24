@@ -227,7 +227,7 @@ def get_bills(date, trip_id):
 	def concerns(order):
 		return session["user"] == trip["user"] or session["user"] == order["user"]
 
-	orders = [o for o in trip.get("orders", []) if concerns(o)]
+	orders = [o for o in trip.get("orders", []) if concerns(o) and destination_menu[o["order"]]["price"] > 0]
 	return render_template("bills.html",
 		user=session["user"],
 		date=date,
