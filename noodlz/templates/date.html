@@ -62,7 +62,7 @@
 					</div>
 				{% endfor %}
 				</div>
-			{% if order_accepted %}
+			{% if order_accepted != None and order_accepted|int == trip_i %}
 				<div class="well">
 					<p>Order accepted!</p>
 				</div>
