@@ -139,10 +139,10 @@ def get_date(date):
 		user=session["user"],
 		date=date,
 		trips=trips,
-		my_orders=my_orders,
-		order_accepted=request.args.get("order_accepted", None),
 		destinations=DESTINATIONS,
-		version=__version__
+		version=__version__,
+		msg=request.args.get("msg"),
+		msg_severity=request.args.get("msg_severity"),
 	)
 
 
