@@ -115,10 +115,9 @@ def get_logout():
 	return redirect(url_for("get_date", date=redirect_date))
 
 
-@app.route("/reload")
-def get_reload():
-	reload()
-	return "OK"
+@app.route("/terms/", methods=['GET'])
+def terms():
+	return render_template('terms.html', version=__version__)
 
 
 @app.route("/<date>/", methods=["GET"])
