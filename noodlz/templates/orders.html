@@ -11,36 +11,35 @@
 	<div id="content">
 		<section>
 			<header>
-				<h2 class="destination">{{ destinations[destination]["title"]}}</h2>
-				<span class="date">{{ date }}</span>
+				<h2 class="destination">{{ trip.destination.name }}</h2>
+				<a href="{{ url_for('date_show', date=trip.date) }}"><span class="date">{{ trip.date }}</span></a>
 				<div class="right">
 					<form>
-						<button formmethod="GET" formaction="{{trip_id}}/bills" title="Settle"><i class="fas fa-money-bill-wave"></i></button>
+						<button formmethod="GET" formaction="{{ url_for('trip_show_settle', trip_id=trip.id) }}" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button>
 					</form>
 					<form>
 					{% if not show_users %}
 						<input type="hidden" name="users" />
 					{% endif %}
-						<button formaction="#" formmethod="GET" title="{% if show_users %}Hide Users{% else %}Show Users{% endif %}"><i class="fas {% if show_users %}fa-user-slash{% else %}fa-user{% endif %}"></i></button>
+						<button formmethod="GET" formaction="" title="{% if show_users %}Hide Users{% else %}Show Users{% endif %}"><i class="fas {% if show_users %}fa-user-slash{% else %}fa-user{% endif %}"></i></button>
 					</form>
 				</div>
 			</header>
 			<div class="orders">
-			{% for order in orders %}
-				{% set item_data = destinations[destination]["options"][order["order"]] %}
+			{% for trip_item in trip_items %}
 				<div class="order">
-					<span class="order-count">{{ order["count"] }}</span>
-				{% if "id" in item_data %}
-					<span class="id">{{ item_data["id"] }}</span>
+					<span class="order-count">{{ trip_item.users|length }}</span>
+				{% if trip_item.item.tag %}
+					<span class="id">{{ trip_item.item.tag }}</span>
 				{% endif %}
-					<span class="item">{{ item_data["title"] }}</span>
-					<ul class="options">{% for option in item_data.get("options", []) %}
+					<span class="item">{{ trip_item.item.name.split(';')[0] }}</span>
+					<ul class="options">{% for option in trip_item.item.name.split(';')[1:] %}
 						<li>{{ option }}</li>
 					{% endfor %}</ul>
 					{% if show_users %}
 					<div class="right">
-						<ul class="users">{% for user in order.get("users", []) %}
-							<li class="user">{{ user }}</li>
+						<ul class="users">{% for user in trip_item.users %}
+							<li class="user">{{ user.name }}</li>
 						{% endfor %}</ul>
 					</div>
 					{% endif %}

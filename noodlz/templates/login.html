@@ -15,12 +15,13 @@
 			</header>
 		</section>
 		<section>
-			<form action="/login?date={{ date }}" method="POST">
+			<form action="/login?redirect={{ redirect }}" method="POST">
 				<header>
 					<h1>Who are you?</h1>
 				</header>
 				<div class="order login">
-					<input type="text" placeholder="Enter a Name" name="user" />
+					<input type="text" placeholder="Username" name="user" />
+					<input type="password" placeholder="Password" name="pass" />
 				</div>
 				<footer>
 					<div class="right">

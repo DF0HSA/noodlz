@@ -14,8 +14,8 @@
 				<h1>Developer Monday</h1>
 				<span class="date">{{ date }}</span>
 				<div class="right">
-					<span class="user">{{ user }}</span>
-					<form><button formmethod="POST" formaction="/logout?date={{ date }}" type="submit" title="Logout"><i class="fas fa-sign-out-alt"></i></button></form>
+					<span class="user">{{ user.name }}</span>
+					<form><button formmethod="POST" formaction="{{ url_for('logout', redirect=url_for('date_show', date=date)) }}" type="submit" title="Logout"><i class="fas fa-sign-out-alt"></i></button></form>
 				</div>
 			</header>
 		</section>
@@ -25,42 +25,40 @@
 		</section>
 	{% endif %}
 	{% for trip in trips %}
-		{% set trip_i = loop.index - 1 %}
-		{% set destination_data = destinations[trip["destination"]] %}
-		{% set trip_orders = my_orders[trip_i] %}
-		<section class="trip {% if trip.get('closed', False) %}closed{% endif %}">
+		<section class="trip {% if trip.closed %}closed{% endif %}">
 			<header>
-				<h2 class="destination">{{ destinations[trip["destination"]]["title"]}}</h2>
-				<span class="person">{{ trip["user"] }}</span>
+				<h2 class="destination">{{ trip.destination.name }}</h2>
+				<span class="person">{{ trip.user.name }}</span>
 				<div class="right">
-				{% if trip["user"] == user %}
-					<form><button formmethod="GET" formaction="trip/{{ trip_i }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
+				{% if trip.user == user %}
+					<form><button formmethod="GET" formaction="{{ url_for('trip_show_orders', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
 				{% endif %}
-				{% if trip["user"] == user and not trip.get("closed", False) %}
-					<form><button formmethod="POST" formaction="trip/{{ trip_i }}/close" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
+				{% if trip.user.id == user and not trip.closed %}
+					<form><button formmethod="POST" formaction="{{ url_for('trip_close', trip_id=trip.id) }}" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
 				{% endif %}
-				{% if trip.get("closed", False) %}
-					<form><button formmethod="GET" formaction="trip/{{ trip_i }}/bills" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button></form>
+				{% if trip.closed %}
+					<form><button formmethod="GET" formaction="{{ url_for('trip_show_settle', trip_id=trip.id) }}" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button></form>
 				{% endif %}
 				</div>
 			</header>
 			<form>
 				<div class="orders">
-				{% for item, item_data in destination_data["options"].items() %}
-					<div class="order {% if trip_orders.get(item, 0) > 0 %}nonzero{% else %}zero{% endif %}">
-					{% if "id" in item_data %}
-						<span class="id">{{ item_data["id"] }}</span>
+				{% for item in trip.destination.items %}
+					<div class="order">
+					{% if item.tag %}
+						<span class="id">{{ item.tag }}</span>
 					{% endif %}
-						<span class="item">{{ item_data["title"] }}</span>
-						<ul class="options">{% for option in item_data.get("options", []) %}
+						<span class="item">{{ item.name.split(";")[0] }}</span>
+						<ul class="options">{% for option in item.name.split(';')[1:] %}
 							<li>{{ option }}</li>
 						{% endfor %}</ul>
 						<div class="right">
-							<span class="price">&euro; {{ "%.2f"|format(item_data["price"]) }}</span>
-						{% if trip.get("closed", False) %}
-							<span class="order-count">{{ trip_orders.get(item, 0) }}</span>
+							<span class="price">&euro; {{ "%.2f"|format(item.price) }}</span>
+						{% set user_order = trip.get_user_item_count(user, item) %}
+						{% if trip.closed %}
+							<span class="order-count">{{ user_order }}</span>
 						{% else %}
-							<input class="order-count" type="number" name="item-{{ item }}" min="0" value="{{ trip_orders.get(item, 0) }}" />
+							<input class="order-count" type="number" name="item-{{ item.id }}" min="0" value="{{ user_order }}" />
 						{% endif %}
 						</div>
 					</div>
@@ -68,10 +66,10 @@
 				</div>
 				<footer>
 					<div class="right">
-					{% if trip.get("closed", False) %}
+					{% if trip.closed %}
 						<span class="note"><i class="fas fa-fw fa-lock"></i> This trip is closed.</span>
 					{% else %}
-						<button type="submit" formmethod="POST" formaction="trip/{{ trip_i }}/order" title="Order"><i class="fas fa-fw fa-check"></i>Order</button>
+						<button type="submit" formmethod="POST" formaction="{{ url_for('trip_submit_order', trip_id=trip.id) }}" title="Order"><i class="fas fa-fw fa-check"></i>Order</button>
 					{% endif %}
 					</div>
 				</footer>
@@ -88,12 +86,12 @@
 			<form>
 				<footer>
 					<select name="destination">
-					{% for destination, destination_data in destinations.items() %}
-						<option value="{{ destination }}">{{ destination_data["title"] }}</option>
+					{% for destination in destinations %}
+						<option value="{{ destination.id }}">{{ destination.name }}</option>
 					{% endfor %}
 					</select>
 					<div class="right">
-						<button type="submit" formmethod="POST" formaction="trip" value="Add Trip"><i class="fas fa-fw fa-plus"></i>Add Trip</button>
+						<button type="submit" formmethod="POST" formaction="{{ url_for('date_submit_trip', date=date) }}" value="Add Trip"><i class="fas fa-fw fa-plus"></i>Add Trip</button>
 					</div>
 				</footer>
 			</form>

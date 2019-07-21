@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset="UTF-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<title>Developer Monday</title>
+	<link rel="stylesheet" href="/static/style.css" />
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.8.1/css/all.css" integrity="sha384-50oBUHEmvpQ+1lW4y57PTFmhCaXp0ML5d60M1M7uH2+nqUivzIebhndOJK28anvf" crossorigin="anonymous">
+</head>
+<body>
+	<div id="content">
+		<section>
+			<header>
+				<h2 class="destination">{{ trip.destination.name }}</h2>
+				<a href="{{ url_for('date_show', date=trip.date) }}"><span class="date">{{ trip.date }}</span></a>
+				<div class="right">
+					<form>
+						<form><button formmethod="GET" formaction="{{ url_for('trip_show_orders', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
+					</form>
+				</div>
+			</header>
+			<form>
+				<div class="orders">
+				{% for order in trip.orders %}
+					<div class="order">
+					{% if order.item.tag %}
+						<span class="id">{{ order.item.tag }}</span>
+					{% endif %}
+						<span class="item">{{ order.item.name.split(";")[0] }}</span>
+						<ul class="options">{% for option in order.item.name.split(";")[1:] %}
+							<li>{{ option }}</li>
+						{% endfor %}</ul>
+						<div class="right">
+							<ul class="users">{# {% for user in order.get("users", []) %} #}
+								<li class="user">{{ order.user.name }}</li>
+							{# {% endfor %} #}</ul>
+							<span class="price">&euro; {{ "%.2f"|format(order.item.price) }}</span>
+							<input type="checkbox" name="order-{{ order.id }}" {% if order.settled %}checked{% endif %}/>
+						</div>
+					</div>
+				{% endfor %}
+				</div>
+				<footer>
+					<div class="right">
+						<button type="submit" formmethod="POST" formaction="" title="Save"><i class="fas fa-fw fa-check"></i>Save</button>
+					</div>
+				</footer>
+			</form>
+		</section>
+		{% include '_footer.html' %}
+	</div>
+</body>
+</html>

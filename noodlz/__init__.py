@@ -4,88 +4,85 @@ import json
 import re
 import os.path
 
-from flask import Flask, url_for, redirect, request, render_template, session, abort
+from flask import Flask
+from flask import url_for, redirect, render_template, abort
+from flask import session, request, g
+from flask_sqlalchemy import SQLAlchemy
+import sqlalchemy.exc
+import passlib.hash
 
-__version__ = "1.0.2"
+__version__ = "1.1.0"
+
+RE_USER = re.compile('^[A-Za-z_][A-Za-z0-9-_]{,31}$')
 
 app = Flask(__name__)
 app.config.from_envvar('NOODLZ_SETTINGS')
-
-DESTINATIONS = {}
-RE_USER = re.compile('^[A-Za-z_][A-Za-z0-9-_]{,31}$')
-DATA_DIR = app.config.get('DATA_DIR', '.')
+db = SQLAlchemy(app)
 
 
-def reload():
-	global DESTINATIONS
-	if not os.path.isdir(DATA_DIR):
-		os.mkdir(DATA_DIR)
-	if not os.path.isdir(DATA_DIR + "/trips"):
-		os.mkdir(DATA_DIR + "/trips")
-	try:
-		with open(os.path.join(DATA_DIR, "destinations.json"), "r") as f:
-			DESTINATIONS = json.load(f)
-	except FileNotFoundError:
-		DESTINATIONS = {}
-
-reload()
+class User(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(32), unique=True, nullable=False)
+	pass_hash = db.Column(db.String(128), nullable=False)
 
 
-def load_trips(date, empty=False):
-	'''
-	[
-		{"user": <str>, "destination": <str>, "orders": [
-			{"user": <str>, "order": <str>},
-		]}, ...
-	]
-	'''
-	date = datetime.datetime.strptime(date, "%Y-%m-%d").date().isoformat()
-	try:
-		with open(os.path.join(DATA_DIR, 'trips', date + ".json"), 'r') as f:
-			trips = json.load(f)
-	except FileNotFoundError:
-		if empty:
-			trips = []
-		else:
-			raise
-	return date, trips
+class Destination(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.String(128), unique=True, nullable=False)
 
 
-def save_trips(date, trips):
-	date = datetime.datetime.strptime(date, "%Y-%m-%d").date().isoformat()
-	with open(os.path.join(DATA_DIR, 'trips', date + ".json"), 'w') as f:
-		json.dump(trips, f, indent='  ')
+class Item(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	name = db.Column(db.Text(), unique=True, nullable=False)
+	tag = db.Column(db.String(16), default=None, nullable=True)
+	price = db.Column(db.Numeric(9, scale=2), nullable=False)
+	destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'))
+	destination = db.relationship('Destination', backref=db.backref('items', lazy=True))
 
 
-def update_orders(orders, user, item, count):
-	n = 0
-	for order in orders:
-		if order["user"] == user and order["order"] == item:
-			if n >= count:
-				pass
-			else:
-				n += 1
-				yield order
-		else:
-			yield order
-	for i in range(n, count):
-		yield {"user": user, "order": item}
+class Trip(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	date = db.Column(db.Date(), nullable=False)
+	closed = db.Column(db.Boolean(), default=False, nullable=False)
+	destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'))
+	destination = db.relationship('Destination')
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	user = db.relationship('User', backref=db.backref('trips', lazy=True))
+	__table_args__ = (db.UniqueConstraint('user_id', 'date', 'destination_id'),)
+
+	def get_items_grouped(self):
+		trip_items = sorted(set(o.item for o in self.orders), key=lambda i: i.id)
+		return [{"item": item, "users": [o.user for o in self.orders if o.item == item]} for item in trip_items]
+
+	def get_user_item_count(self, user, item):
+		return len([o for o in self.orders if o.user == user and o.item == item])
+
+	def get_item_users(self, item):
+		return [o.user for o in self.orders if o.item == item]
 
 
-def require_user(f):
-	@functools.wraps(f)
-	def wrapper(*args, **kwargs):
-		if 'user' not in session:
-			return render_template('login.html', version=__version__, **kwargs)
-		else:
-			return f(*args, **kwargs)
-	return wrapper
+class Order(db.Model):
+	id = db.Column(db.Integer, primary_key=True)
+	settled = db.Column(db.Boolean(), default=False, nullable=False)
+	item_id = db.Column(db.Integer, db.ForeignKey('item.id'))
+	item = db.relationship('Item')
+	trip_id = db.Column(db.Integer, db.ForeignKey('trip.id'))
+	trip = db.relationship('Trip', backref=db.backref('orders', lazy=True))
+	user_id = db.Column(db.Integer, db.ForeignKey('user.id'))
+	user = db.relationship('User', backref=db.backref('orders', lazy=True))
+
+
+def parse_date(date_str):
+	return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+
+
+def now():
+	return datetime.datetime.now().date().isoformat()
 
 
 @app.route("/")
 def index():
-	today = datetime.datetime.now().date().isoformat()
-	return redirect(url_for("get_date", date=today))
+	return redirect(url_for("date_show", date=now()))
 
 
 @app.route("/favicon.ico")
@@ -93,26 +90,43 @@ def favicon():
 	return app.send_static_file('favicon.ico')
 
 
-@app.route("/login", methods=['POST'])
-def post_login():
+def fullpath(request):
+	fp = request.path
+	if request.query_string:
+		fp += '?' + str(request.query_string, 'utf-8')
+	print(fp)
+	return fp
+
+
+def require_user(f):
+	@functools.wraps(f)
+	def wrapper(*args, **kwargs):
+		if 'user_id' not in session:
+			return render_template('login.html', version=__version__, redirect=fullpath(request))
+		else:
+			g.user = User.query.filter_by(id=session['user_id']).first()
+			if g.user is None:
+				abort(500, "Your account doesn't exist anymore.")
+			return f(*args, **kwargs)
+	return wrapper
+
+
+@app.route("/login/", methods=['POST'])
+def login():
 	if not RE_USER.match(request.form["user"]):
-		abort(400, "Invalid username. Start with a letter, alphanumeric, length between 1 and 32 characters.")
-	session['user'] = request.form["user"]
-	if 'date' in request.args:
-		redirect_date = request.args['date']
-	else:
-		redirect_date = datetime.datetime.now().date().isoformat()
-	return redirect(url_for("get_date", date=redirect_date))
+		abort(400, "Invalid username. Start with a letter, continue alphanumeric, length between 1 and 32 characters.")
+	user = User.query.filter_by(name=request.form["user"]).first()
+	if user is None or not passlib.hash.bcrypt.verify(request.form["pass"], user.pass_hash):
+		abort(403, "Invalid username or password")
+	session['user_id'] = user.id
+	return redirect(request.args.get('redirect', url_for('date_show', date=now())))
 
 
-@app.route("/logout", methods=['GET', 'POST'])
-def get_logout():
-	del session['user']
-	if 'date' in request.args:
-		redirect_date = request.args['date']
-	else:
-		redirect_date = datetime.datetime.now().date().isoformat()
-	return redirect(url_for("get_date", date=redirect_date))
+@app.route("/logout/", methods=['GET', 'POST'])
+def logout():
+	if 'user_id' in session:
+		del session['user_id']
+	return redirect(request.args.get('redirect', url_for('date_show', date=now())))
 
 
 @app.route("/terms/", methods=['GET'])
@@ -122,140 +136,115 @@ def terms():
 
 @app.route("/<date>/", methods=["GET"])
 @require_user
-def get_date(date):
-	date, trips = load_trips(date, True)
-	if datetime.datetime.strptime(date, "%Y-%m-%d").weekday() != 0:
+def date_show(date):
+	date = parse_date(date)
+	if date.weekday() != 0:
 		return render_template("notmonday.html", version=__version__)
-
-	my_orders = [{} for _ in trips]
-	for trip_i, trip in enumerate(trips):
-		for order in trip.get("orders", []):
-			if order["user"] == session["user"]:
-				my_orders[trip_i].setdefault(order["order"], 0)
-				my_orders[trip_i][order["order"]] += 1
+	trips = Trip.query.filter_by(date=date).all()
+	destinations = Destination.query.all()
 
 	return render_template("date.html",
-		user=session["user"],
+		user=g.user,
 		date=date,
 		trips=trips,
-		destinations=DESTINATIONS,
+		destinations=destinations,
 		version=__version__,
 		msg=request.args.get("msg"),
 		msg_severity=request.args.get("msg_severity"),
 	)
 
 
-@app.route("/<date>/trip/<int:trip_id>/order", methods=["POST"])
+@app.route("/<date>/", methods=["POST"])
 @require_user
-def post_order(date, trip_id):
-	date, trips = load_trips(date, True)
-	trip = trips[trip_id]
-	if trip.get("closed", False):
+def date_submit_trip(date):
+	destination = Destination.query.filter_by(id=request.form["destination"]).first()
+	trip = Trip(user=g.user, destination=destination, date=parse_date(date))
+	db.session.add(trip)
+	try:
+		db.session.commit()
+		return redirect(url_for("date_show", date=date))
+	except sqlalchemy.exc.IntegrityError:
+		return redirect(url_for("date_show", date=date, msg="You've already added a trip to that destination!", msg_severity="error"))
+
+
+@app.route("/trip/<int:trip_id>/order", methods=["POST"])
+@require_user
+def trip_submit_order(trip_id):
+	trip = Trip.query.filter_by(id=trip_id).first()
+	if trip.closed:
 		abort(400, "This trip is already closed.")
-	orders = trip.setdefault("orders", [])
-	for item, count in request.form.to_dict().items():
-		if item.startswith("item-"):
-			item = item.replace("item-", "", 1)
-			trip["orders"] = list(update_orders(trip.get("orders", []), session["user"], item, int(count)))
-	save_trips(date, trips)
-	return redirect(url_for("get_date", date=date, order_accepted=trip_id))
+	for item_id, count in request.form.to_dict().items():
+		if not item_id.startswith("item-"):
+			continue
+		item_id = item_id.replace("item-", "", 1)
+		item = Item.query.filter_by(id=item_id).first()
+		order = Order.query.filter_by(trip=trip, item=item, user=g.user).first()
+		count = int(count)
+		if count > 0:
+			if order is None:
+				order = Order(trip=trip, item=item, user=g.user, quantity=count)
+			else:
+				order.quantity = count
+			db.session.add(order)
+		if count == 0:
+			if order is not None:
+				db.session.delete(order)
+	db.session.commit()
+	return redirect(url_for("date_show", date=trip.date, msg="Order accepted!", msg_severity='success'))
 
 
-@app.route("/<date>/trip/<int:trip_id>/close", methods=["POST"])
+@app.route("/trip/<int:trip_id>/close", methods=["POST"])
 @require_user
-def post_trip_close(date, trip_id):
-	date, trips = load_trips(date, True)
-	trip = trips[trip_id]
-	if session["user"] != trip["user"]:
+def trip_close(trip_id):
+	trip = Trip.query.filter_by(id=trip_id).first()
+	if g.user != trip.user:
 		abort(403, "You can't close someone else's trip.")
-	trip["closed"] = True
-	save_trips(date, trips)
-	return redirect(url_for("get_orders", date=date, trip_id=trip_id))
+	trip.closed = True
+	db.session.add(trip)
+	db.session.commit()
+	return redirect(url_for("trip_show_orders", trip_id=trip_id))
 
 
-@app.route("/<date>/trip", methods=["POST"])
+@app.route("/trip/<int:trip_id>")
 @require_user
-def post_trip(date):
-	date, trips = load_trips(date, True)
-	trip = {"user": session["user"], "destination": request.form["destination"]}
-	trips.append(trip)
-	save_trips(date, trips)
-	return redirect(url_for("get_date", date=date))
-
-
-@app.route("/<date>/trip/<int:trip_id>")
-@require_user
-def get_orders(date, trip_id):
-	date, trips = load_trips(date)
-	trip = trips[trip_id]
-	destination_menu = DESTINATIONS[trip["destination"]]["options"]
-
-	if session["user"] != trip["user"]:
+def trip_show_orders(trip_id):
+	trip = Trip.query.filter_by(id=trip_id).first()
+	if g.user != trip.user:
 		abort(403, "You can't read someone else's order list.")
-
-	orders = {}
-	for order in trip.get("orders", []):
-		order_item = order["order"]
-		if order_item in orders:
-			order_element = orders[order_item]
-		else:
-			order_element = orders.setdefault(order_item, {"order": order_item, "count": 0, "users": []})
-		order_element["count"] += 1
-		order_element["users"].append(order["user"])
-	order_list = list(sorted(orders.values(), key=lambda o: o["order"]))
-	total = sum(destination_menu[o["order"]]["price"] * o["count"] for o in order_list)
+	trip_items = trip.get_items_grouped()
+	total = sum(o["item"].price * len(o["users"]) for o in trip_items)
 	return render_template("orders.html",
-		user=session["user"],
-		date=date,
-		trip_id=trip_id,
-		orders=order_list,
+		user=g.user,
+		trip=trip,
+		trip_items=trip_items,
 		show_users="users" in request.args,
-		destination=trip["destination"],
-		destinations=DESTINATIONS,
 		total=total,
 	)
 
 
-@app.route("/<date>/trip/<int:trip_id>/bills")
+@app.route("/trip/<int:trip_id>/settle")
 @require_user
-def get_bills(date, trip_id):
-	date, trips = load_trips(date)
-	trip = trips[trip_id]
-	destination_menu = DESTINATIONS[trip["destination"]]["options"]
-
-	def concerns(order):
-		return session["user"] == trip["user"] or session["user"] == order["user"]
-
-	orders = [o for o in trip.get("orders", []) if concerns(o) and destination_menu[o["order"]]["price"] > 0]
-	return render_template("bills.html",
-		user=session["user"],
-		date=date,
-		trip_id=trip_id,
-		is_owner=session["user"] == trip["user"],
-		orders=orders,
-		destination=trip["destination"],
-		destinations=DESTINATIONS,
+def trip_show_settle(trip_id):
+	trip = Trip.query.filter_by(id=trip_id).first()
+	if g.user != trip.user:
+		abort(403, "You can't read someone else's order settlement.")
+	return render_template("settle.html",
+		user=g.user,
+		trip=trip,
 	)
 
 
-@app.route("/<date>/trip/<int:trip_id>/bills", methods=["POST"])
+@app.route("/trip/<int:trip_id>/settle", methods=["POST"])
 @require_user
-def post_bills(date, trip_id):
-	date, trips = load_trips(date)
-	trip = trips[trip_id]
-
-	if session["user"] != trip["user"]:
+def trip_update_settle(trip_id):
+	trip = Trip.query.filter_by(id=trip_id).first()
+	if g.user != trip.user:
 		abort(403, "You can't read settle someone else's bills.")
-
-	# forms only send checkboxes that are on
-	for order in trip["orders"]:
-		order.pop("paid", None)
-
-	for order, paid in request.form.to_dict().items():
-		if order.startswith("order-"):
-			order_i = int(order.replace("order-", "", 1))
-			print(order, paid)
-			trip["orders"][order_i].update(paid=paid == "on")
-
-	save_trips(date, trips)
-	return redirect(url_for("get_bills", date=date, trip_id=trip_id, payment_accepted=True))
+	settle = request.form.to_dict()
+	for order in trip.orders:
+		new_paid = settle.get(f"order-{order.id}", "off") == "on"
+		if order.settled != new_paid:
+			order.settled = new_paid
+			db.session.add(order)
+	db.session.commit()
+	return redirect(url_for("trip_show_settle", trip_id=trip_id))
