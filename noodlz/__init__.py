@@ -115,10 +115,9 @@ def get_logout():
 	return redirect(url_for("get_date", date=redirect_date))
 
 
-@app.route("/reload")
-def get_reload():
-	reload()
-	return "OK"
+@app.route("/terms/", methods=['GET'])
+def terms():
+	return render_template('terms.html', version=__version__)
 
 
 @app.route("/<date>/", methods=["GET"])
@@ -139,10 +138,10 @@ def get_date(date):
 		user=session["user"],
 		date=date,
 		trips=trips,
-		my_orders=my_orders,
-		order_accepted=request.args.get("order_accepted", None),
 		destinations=DESTINATIONS,
-		version=__version__
+		version=__version__,
+		msg=request.args.get("msg"),
+		msg_severity=request.args.get("msg_severity"),
 	)
 
 

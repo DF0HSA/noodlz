@@ -5,32 +5,21 @@
 }
 
 body {
-	/* deep orange */
-	--accent-lighten-5: #fbe9e7;
-	--accent-lighten-4: #ffccbc;
-	--accent-lighten-3: #ffab91;
-	--accent-lighten-2: #ff8a65;
-	--accent-lighten-1: #ff7043;
-	--accent: #ff5722;
-	--accent-darken-1: #f4511e;
-	--accent-darken-2: #e64a19;
-	--accent-darken-3: #d84315;
-	--accent-darken-4: #bf360c;
+	--deep-orange-50: #FBE9E7; --deep-orange-100: #FFCCBC; --deep-orange-200: #FFAB91; --deep-orange-300: #FF8A65; --deep-orange-400: #FF7043; --deep-orange-500: #FF5722; --deep-orange-600: #F4511E; --deep-orange-700: #E64A19; --deep-orange-800: #D84315; --deep-orange-900: #BF360C; --deep-orange-a100: #FF9E80; --deep-orange-a200: #FF6E40; --deep-orange-a400: #FF3D00; --deep-orange-a700: #DD2C00;
+	--orange-50: #FFF3E0; --orange-100: #FFE0B2; --orange-200: #FFCC80; --orange-300: #FFB74D; --orange-400: #FFA726; --orange-500: #FF9800; --orange-600: #FB8C00; --orange-700: #F57C00; --orange-800: #EF6C00; --orange-900: #E65100; --orange-a100: #FFD180; --orange-a200: #FFAB40; --orange-a400: #FF9100; --orange-a700: #FF6D00;
+	--light-green-50: #F1F8E9; --light-green-100: #DCEDC8; --light-green-200: #C5E1A5; --light-green-300: #AED581; --light-green-400: #9CCC65; --light-green-500: #8BC34A; --light-green-600: #7CB342; --light-green-700: #689F38; --light-green-800: #558B2F; --light-green-900: #33691E; --light-green-a100: #CCFF90; --light-green-a200: #B2FF59; --light-green-a400: #76FF03; --light-green-a700: #64DD17;
+	--blue-grey-50: #ECEFF1; --blue-grey-100: #CFD8DC; --blue-grey-200: #B0BEC5; --blue-grey-300: #90A4AE; --blue-grey-400: #78909C; --blue-grey-500: #607D8B; --blue-grey-600: #546E7A; --blue-grey-700: #455A64; --blue-grey-800: #37474F; --blue-grey-900: #263238;
 
-	/* blue-grey */
-	--main-lighten-5: #eceff1;
-	--main-lighten-4: #cfd8dc;
-	--main-lighten-3: #b0bec5;
-	--main-lighten-2: #90a4ae;
-	--main-lighten-1: #78909c;
-	--main: #607d8b;
-	--main-darken-1: #546e7a;
-	--main-darken-2: #455a64;
-	--main-darken-3: #37474f;
-	--main-darken-4: #263238;
+	--accent-50: var(--orange-50); --accent-100: var(--orange-100); --accent-200: var(--orange-200); --accent-300: var(--orange-300); --accent-400: var(--orange-400); --accent-500: var(--orange-500); --accent-600: var(--orange-600); --accent-700: var(--orange-700); --accent-800: var(--orange-800); --accent-900: var(--orange-900); --accent-a100: var(--orange-a100); --accent-a200: var(--orange-a200); --accent-a400: var(--orange-a400); --accent-a700: var(--orange-a700);
+	--main-50: var(--blue-grey-50); --main-100: var(--blue-grey-100); --main-200: var(--blue-grey-200); --main-300: var(--blue-grey-300); --main-400: var(--blue-grey-400); --main-500: var(--blue-grey-500); --main-600: var(--blue-grey-600); --main-700: var(--blue-grey-700); --main-800: var(--blue-grey-800); --main-900: var(--blue-grey-900);
 
-	background-color: var(--main-darken-3);
-	color: var(--main-darken-4);
+	--msg-error-fore: var(--accent-900);
+	--msg-error-back: var(--accent-200);
+	--msg-success-fore: var(--light-green-900);
+	--msg-success-back: var(--light-green-200);
+
+	background-color: var(--main-800);
+	color: var(--main-900);
 }
 
 /* generic element styles */
@@ -46,42 +35,30 @@ h2 {
 	font-size: 1em;
 }
 span.id, span.note, span.date, span.person, span.price {
-	color: var(--main);
+	color: var(--main-500);
 }
 span.id {
 	font-family: monospace;
 	font-size: 1.25em;
-	margin-right: 0.5em;
-}
-span.order-count {
-	margin-right: 0.5em;
-}
-span.order-count:after {
-	content: '\00d7';
-	color: var(--main-darken-1);
-	margin-left: 1px;
-}
-span.id:before {
-	content: '#';
 }
 input,select {
 	padding: 0.5ex;
 	border-radius: 0.5ex;
-	border: 1px solid var(--main-lighten-2);
-	box-shadow: 0px 0px 3px 2px var(--main-lighten-5);
-	background-color: var(--main-lighten-5);
+	border: 1px solid var(--main-300);
+	box-shadow: 0px 0px 3px 2px var(--main-50);
+	background-color: var(--main-50);
 }
 button {
 	padding: 0.75ex;
-	background-color: var(--accent-lighten-1);
+	background-color: var(--accent-400);
 	color: white;
-	border: 1px solid var(--accent-darken-3);
+	border: 1px solid var(--accent-800);
 	border-radius: 0.5ex;
-	box-shadow: 0px 0px 2px 1px var(--main-lighten-2);
+	box-shadow: 0px 0px 2px 1px var(--main-300);
 }
 button:active {
-	background-color: var(--accent-darken-4);
-	border-color: var(--accent-lighten-1);
+	background-color: var(--accent-900);
+	border-color: var(--accent-400);
 }
 input,select,button {
 	font-size: inherit;
@@ -111,9 +88,9 @@ section {
 	display: flex;
 	flex-direction: column;
 	margin: 1em 0;
-	border: 1px solid var(--main-darken-3);
+	border: 1px solid var(--main-800);
 	border-radius: 0.5ex;
-	background-color: var(--main-lighten-4);
+	background-color: var(--main-100);
 }
 section header,footer,div.order {
 	display: flex;
@@ -122,9 +99,21 @@ section header,footer,div.order {
 	align-items: baseline;
 	padding: 0.5ex;
 }
+section.msg {
+	
+	padding: 1ex;
+}
+section.msg.error {
+	background-color: var(--msg-error-back);
+	color: var(--msg-error-fore);
+}
+section.msg.success {
+	background-color: var(--msg-success-back);
+	color: var(--msg-success-fore);
+}
 div.well {
-	background-color: var(--accent-lighten-3);
-	color: var(--main-darken-4);
+	background-color: var(--accent-200);
+	color: var(--main-900);
 	padding: 1ex 0.5ex;
 }
 div.orders {
@@ -137,7 +126,7 @@ div.order {
 	background-color: white;
 }
 section.trip.closed div.order {
-	background-color: var(--main-lighten-5);
+	background-color: var(--main-50);
 }
 section.trip.closed div.order.zero {
 	display: none;
@@ -149,11 +138,11 @@ ul li {
 	margin: 0 1px;
 }
 ul.options li {
-	background: var(--accent-lighten-4);
+	background: var(--accent-100);
 }
 ul.users li {
-	background: var(--accent-darken-4);
-	color: var(--main-lighten-5);
+	background: var(--accent-900);
+	color: var(--main-50);
 }
 div.right {
 	margin-left: auto;
@@ -162,6 +151,17 @@ div.right {
 	align-items: inherit;
 }
 
+span.order-count {
+	
+}
+span.order-count:after {
+	content: '\00d7';
+	color: var(--main-600);
+	margin-left: 1px;
+}
+span.id:before {
+	content: '#';
+}
 input[type="checkbox"] {
 	margin-left: -1ex;
 	margin-right: -1ex;
@@ -174,6 +174,5 @@ i.fa-fw {
 	section {
 		border-radius: 0;
 		width: 100%;
-		font-size: 1.5em;
 	}
 }
