@@ -4,12 +4,6 @@
 	margin: 0;
 }
 
-@media only screen and (max-width: 600px) {
-	/*html {
-		font-size: 1.5em;
-	}*/
-}
-
 body {
 	/* deep orange */
 	--accent-lighten-5: #fbe9e7;
@@ -56,6 +50,19 @@ span.id, span.note, span.date, span.person, span.price {
 }
 span.id {
 	font-family: monospace;
+	font-size: 1.25em;
+	margin-right: 0.5em;
+}
+span.order-count {
+	margin-right: 0.5em;
+}
+span.order-count:after {
+	content: '\00d7';
+	color: var(--main-darken-1);
+	margin-left: 1px;
+}
+span.id:before {
+	content: '#';
 }
 input,select {
 	padding: 0.5ex;
@@ -154,17 +161,7 @@ div.right {
 	flex-direction: inherit;
 	align-items: inherit;
 }
-span.order-count {
-	margin-right: 1em;
-}
-span.order-count:after {
-	content: '\00d7';
-	color: var(--main-darken-1);
-	margin-left: 1px;
-}
-span.id:before {
-	content: '#';
-}
+
 input[type="checkbox"] {
 	margin-left: -1ex;
 	margin-right: -1ex;
@@ -177,5 +174,6 @@ i.fa-fw {
 	section {
 		border-radius: 0;
 		width: 100%;
+		font-size: 1.5em;
 	}
 }
