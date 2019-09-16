@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy.exc
 import passlib.hash
 
-__version__ = "1.1.0"
+__version__ = "2.0.0"
 
 RE_USER = re.compile('^[A-Za-z_][A-Za-z0-9-_]{,31}$')
 
