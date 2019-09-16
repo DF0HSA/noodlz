@@ -11,7 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy.exc
 import passlib.hash
 
-__version__ = "2.0.0"
+__version__ = "2.0.1"
 
 RE_USER = re.compile('^[A-Za-z_][A-Za-z0-9-_]{,31}$')
 
@@ -178,17 +178,14 @@ def trip_submit_order(trip_id):
 			continue
 		item_id = item_id.replace("item-", "", 1)
 		item = Item.query.filter_by(id=item_id).first()
-		order = Order.query.filter_by(trip=trip, item=item, user=g.user).first()
+		orders = Order.query.filter_by(trip=trip, item=item, user=g.user).all()
 		count = int(count)
-		if count > 0:
-			if order is None:
-				order = Order(trip=trip, item=item, user=g.user, quantity=count)
-			else:
-				order.quantity = count
-			db.session.add(order)
-		if count == 0:
-			if order is not None:
+		if len(orders) > count:
+			for order in orders[count:]:
 				db.session.delete(order)
+		elif len(orders) < count:
+			for i in range(len(orders), count):
+				db.session.add(Order(trip=trip, item=item, user=g.user, settled=item.price <= 0))
 	db.session.commit()
 	return redirect(url_for("date_show", date=trip.date, msg="Order accepted!", msg_severity='success'))
 

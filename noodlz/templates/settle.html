@@ -22,22 +22,24 @@
 			<form>
 				<div class="orders">
 				{% for order in trip.orders %}
-					<div class="order">
-					{% if order.item.tag %}
-						<span class="id">{{ order.item.tag }}</span>
-					{% endif %}
-						<span class="item">{{ order.item.name.split(";")[0] }}</span>
-						<ul class="options">{% for option in order.item.name.split(";")[1:] %}
-							<li>{{ option }}</li>
-						{% endfor %}</ul>
-						<div class="right">
-							<ul class="users">{# {% for user in order.get("users", []) %} #}
-								<li class="user">{{ order.user.name }}</li>
-							{# {% endfor %} #}</ul>
-							<span class="price">&euro; {{ "%.2f"|format(order.item.price) }}</span>
-							<input type="checkbox" name="order-{{ order.id }}" {% if order.settled %}checked{% endif %}/>
+					{% if order.item.price > 0 %}
+						<div class="order">
+						{% if order.item.tag %}
+							<span class="id">{{ order.item.tag }}</span>
+						{% endif %}
+							<span class="item">{{ order.item.name.split(";")[0] }}</span>
+							<ul class="options">{% for option in order.item.name.split(";")[1:] %}
+								<li>{{ option }}</li>
+							{% endfor %}</ul>
+							<div class="right">
+								<ul class="users">{# {% for user in order.get("users", []) %} #}
+									<li class="user">{{ order.user.name }}</li>
+								{# {% endfor %} #}</ul>
+								<span class="price">&euro; {{ "%.2f"|format(order.item.price) }}</span>
+								<input type="checkbox" name="order-{{ order.id }}" {% if order.settled %}checked{% endif %}/>
+							</div>
 						</div>
-					</div>
+					{% endif %}
 				{% endfor %}
 				</div>
 				<footer>

@@ -33,7 +33,7 @@
 				{% if trip.user == user %}
 					<form><button formmethod="GET" formaction="{{ url_for('trip_show_orders', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
 				{% endif %}
-				{% if trip.user.id == user and not trip.closed %}
+				{% if trip.user == user and not trip.closed %}
 					<form><button formmethod="POST" formaction="{{ url_for('trip_close', trip_id=trip.id) }}" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
 				{% endif %}
 				{% if trip.closed %}
