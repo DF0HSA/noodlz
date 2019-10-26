@@ -180,6 +180,12 @@ def trip_submit_order(trip_id):
 		item = Item.query.filter_by(id=item_id).first()
 		orders = Order.query.filter_by(trip=trip, item=item, user=g.user).all()
 		count = int(count)
+
+		if count > int(app.config.get('MAX_ORDER_COUNT', 16)):
+			abort(400, "You can't order that many items. You can thank the person that ordered 65535 drinks once.")
+		if count < 0:
+			abort(400, "You can't order a negative number of items. What does that even mean?")
+
 		if len(orders) > count:
 			for order in orders[count:]:
 				db.session.delete(order)
@@ -187,6 +193,7 @@ def trip_submit_order(trip_id):
 			for i in range(len(orders), count):
 				db.session.add(Order(trip=trip, item=item, user=g.user, settled=item.price <= 0))
 	db.session.commit()
+
 	return redirect(url_for("date_show", date=trip.date, msg="Order accepted!", msg_severity='success'))
 
 
