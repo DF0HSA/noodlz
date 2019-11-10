@@ -17,6 +17,7 @@ app = Flask(__name__)
 app.config.from_envvar('NOODLZ_SETTINGS')
 app.config['RE_USER'] = re.compile(app.config.get('RE_USER', '^[A-Za-z_][A-Za-z0-9-_]{,31}$'))
 db = SQLAlchemy(app)
+GLOBAL_PARAMS={'version': __version__}
 
 
 class User(db.Model):
@@ -111,9 +112,9 @@ def require_user(f):
 	return wrapper
 
 
-@app.route("/login/", methods=['POST'])
+@app.route("/login", methods=['POST'])
 def login():
-	if not app.cpnfig['RE_USER'].match(request.form["user"]):
+	if not app.config['RE_USER'].match(request.form["user"]):
 		abort(400, "Invalid username.")
 	user = User.query.filter_by(name=request.form["user"]).first()
 	if user is None:  # or not passlib.hash.bcrypt.verify(request.form["pass"], user.pass_hash):
@@ -122,14 +123,14 @@ def login():
 	return redirect(request.args.get('redirect', url_for('date_show', date=now().isoformat())))
 
 
-@app.route("/logout/", methods=['GET', 'POST'])
+@app.route("/logout", methods=['GET', 'POST'])
 def logout():
 	if 'user_id' in session:
 		del session['user_id']
 	return redirect(request.args.get('redirect', url_for('date_show', date=now().isoformat())))
 
 
-@app.route("/terms/", methods=['GET'])
+@app.route("/terms", methods=['GET'])
 def terms():
 	return render_template('terms.html', version=__version__)
 
@@ -144,11 +145,11 @@ def date_show(date):
 	destinations = Destination.query.all()
 
 	return render_template("date.html",
+		**GLOBAL_PARAMS,
 		user=g.user,
 		date=date,
 		trips=trips,
 		destinations=destinations,
-		version=__version__,
 		msg=request.args.get("msg"),
 		msg_severity=request.args.get("msg_severity"),
 	)
@@ -177,11 +178,12 @@ def trip_submit_order(trip_id):
 		if not item_id.startswith("item-"):
 			continue
 		item_id = item_id.replace("item-", "", 1)
+		count = int(count)
+
 		item = Item.query.filter_by(id=item_id).first()
 		if item.historical and count != 0:
 			abort(400, "That item is not orderable any more.")
 
-		count = int(count)
 		if count > int(app.config.get('MAX_ORDER_COUNT', 16)):
 			abort(400, "You can't order that many items. You can thank the person that ordered 65535 drinks once.")
 		if count < 0:
@@ -193,7 +195,7 @@ def trip_submit_order(trip_id):
 				db.session.delete(order)
 		elif len(orders) < count:
 			for i in range(len(orders), count):
-				db.session.add(Order(trip=trip, item=item, user=g.user, settled=item.price <= 0))
+				db.session.add(Order(trip=trip, item=item, user=g.user, settled=item.price <= 0 or trip.user==g.user))
 	db.session.commit()
 
 	return redirect(url_for("date_show", date=trip.date, msg="Order accepted!", msg_severity='success'))
@@ -208,18 +210,19 @@ def trip_close(trip_id):
 	trip.closed = True
 	db.session.add(trip)
 	db.session.commit()
-	return redirect(url_for("trip_show_orders", trip_id=trip_id))
+	return redirect(url_for("trip_show", trip_id=trip_id))
 
 
 @app.route("/trip/<int:trip_id>")
 @require_user
-def trip_show_orders(trip_id):
+def trip_show(trip_id):
 	trip = Trip.query.filter_by(id=trip_id).first()
 	if g.user != trip.user:
 		abort(403, "You can't read someone else's order list.")
 	trip_items = trip.get_items_grouped()
 	total = sum(o["item"].price * len(o["users"]) for o in trip_items)
-	return render_template("orders.html",
+	return render_template("trip.html",
+		**GLOBAL_PARAMS,
 		user=g.user,
 		trip=trip,
 		trip_items=trip_items,
@@ -228,29 +231,31 @@ def trip_show_orders(trip_id):
 	)
 
 
-@app.route("/trip/<int:trip_id>/settle")
+@app.route("/settle")
 @require_user
-def trip_show_settle(trip_id):
-	trip = Trip.query.filter_by(id=trip_id).first()
-	if g.user != trip.user:
-		abort(403, "You can't read someone else's order settlement.")
+def settle_show():
+	# All orders that were ordered by us, but not bought by us
+	outgoing = db.session.query(Order).filter(Order.user == g.user, Order.trip.has(Trip.user != g.user)).all()
+
+	# All orders that were not ordered by us, but were bought by us
+	incoming = db.session.query(Order).filter(Order.user != g.user, Order.trip.has(Trip.user == g.user)).all()
+
 	return render_template("settle.html",
+		**GLOBAL_PARAMS,
 		user=g.user,
-		trip=trip,
-	)
+		outgoing=outgoing,
+		incoming=incoming)
 
 
-@app.route("/trip/<int:trip_id>/settle", methods=["POST"])
+@app.route("/settle", methods=["POST"])
 @require_user
-def trip_update_settle(trip_id):
-	trip = Trip.query.filter_by(id=trip_id).first()
-	if g.user != trip.user:
-		abort(403, "You can't read settle someone else's bills.")
-	settle = request.form.to_dict()
-	for order in trip.orders:
-		new_paid = settle.get(f"order-{order.id}", "off") == "on"
-		if order.settled != new_paid:
-			order.settled = new_paid
+def settle_update():
+	incoming = db.session.query(Order).filter(Order.user != g.user, Order.trip.has(Trip.user == g.user)).all()
+	form = request.form.to_dict()
+	for order in incoming:
+		new_state = form.get(f"order-{order.id}", "off") == "on"
+		if new_state != order.settled:
+			order.settled = new_state
 			db.session.add(order)
 	db.session.commit()
-	return redirect(url_for("trip_show_settle", trip_id=trip_id))
+	return redirect(url_for("settle_show"))

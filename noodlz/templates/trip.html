@@ -15,9 +15,6 @@
 				<a href="{{ url_for('date_show', date=trip.date) }}"><span class="date">{{ trip.date }}</span></a>
 				<div class="right">
 					<form>
-						<button formmethod="GET" formaction="{{ url_for('trip_show_settle', trip_id=trip.id) }}" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button>
-					</form>
-					<form>
 					{% if not show_users %}
 						<input type="hidden" name="users" />
 					{% endif %}

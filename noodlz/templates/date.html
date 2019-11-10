@@ -15,6 +15,7 @@
 				<span class="date">{{ date }}</span>
 				<div class="right">
 					<span class="user">{{ user.name }}</span>
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Settle"><i class="fas fa-money-bill-wave"></i></button></form>
 					<form><button formmethod="POST" formaction="{{ url_for('logout', redirect=url_for('date_show', date=date)) }}" type="submit" title="Logout"><i class="fas fa-sign-out-alt"></i></button></form>
 				</div>
 			</header>
@@ -30,24 +31,21 @@
 				<h2 class="destination">{{ trip.destination.name }}</h2>
 				<span class="person">{{ trip.user.name }}</span>
 				<div class="right">
-				{% if trip.user == user %}
-					<form><button formmethod="GET" formaction="{{ url_for('trip_show_orders', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
-				{% endif %}
-				{% if trip.user == user and not trip.closed %}
+					{% if trip.user == user %}
+					<form><button formmethod="GET" formaction="{{ url_for('trip_show', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
+					{% endif %}
+					{% if trip.user == user and not trip.closed %}
 					<form><button formmethod="POST" formaction="{{ url_for('trip_close', trip_id=trip.id) }}" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
-				{% endif %}
-				{% if trip.closed %}
-					<form><button formmethod="GET" formaction="{{ url_for('trip_show_settle', trip_id=trip.id) }}" title="Settle"><i class="fas fa-fw fa-money-bill-wave"></i>Settle</button></form>
-				{% endif %}
+					{% endif %}
 				</div>
 			</header>
 			<form>
 				<div class="orders">
 				{% for item in trip.destination.items if not item.historical or trip.closed %}
 					<div class="order">
-					{% if item.tag %}
+						{% if item.tag %}
 						<span class="id">{{ item.tag }}</span>
-					{% endif %}
+						{% endif %}
 						<span class="item">{{ item.name.split(";")[0] }}</span>
 						<ul class="options">{% for option in item.name.split(';')[1:] %}
 							<li>{{ option }}</li>
