@@ -77,12 +77,12 @@ def parse_date(date_str):
 
 
 def now():
-	return datetime.datetime.now().date().isoformat()
+	return datetime.datetime.now().date()
 
 
 @app.route("/")
 def index():
-	return redirect(url_for("date_show", date=now()))
+	return redirect(url_for("date_show", date=now().isoformat()))
 
 
 @app.route("/favicon.ico")
@@ -119,14 +119,14 @@ def login():
 	if user is None:  # or not passlib.hash.bcrypt.verify(request.form["pass"], user.pass_hash):
 		abort(403, "Invalid username or password")
 	session['user_id'] = user.id
-	return redirect(request.args.get('redirect', url_for('date_show', date=now())))
+	return redirect(request.args.get('redirect', url_for('date_show', date=now().isoformat())))
 
 
 @app.route("/logout/", methods=['GET', 'POST'])
 def logout():
 	if 'user_id' in session:
 		del session['user_id']
-	return redirect(request.args.get('redirect', url_for('date_show', date=now())))
+	return redirect(request.args.get('redirect', url_for('date_show', date=now().isoformat())))
 
 
 @app.route("/terms/", methods=['GET'])
@@ -178,14 +178,14 @@ def trip_submit_order(trip_id):
 			continue
 		item_id = item_id.replace("item-", "", 1)
 		item = Item.query.filter_by(id=item_id).first()
-		orders = Order.query.filter_by(trip=trip, item=item, user=g.user).all()
-		count = int(count)
 
+		count = int(count)
 		if count > int(app.config.get('MAX_ORDER_COUNT', 16)):
 			abort(400, "You can't order that many items. You can thank the person that ordered 65535 drinks once.")
 		if count < 0:
 			abort(400, "You can't order a negative number of items. What does that even mean?")
 
+		orders = Order.query.filter_by(trip=trip, item=item, user=g.user).all()
 		if len(orders) > count:
 			for order in orders[count:]:
 				db.session.delete(order)
