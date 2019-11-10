@@ -13,10 +13,10 @@ import passlib.hash
 
 __version__ = "2.0.1"
 
-RE_USER = re.compile('^[A-Za-z_][A-Za-z0-9-_]{,31}$')
 
 app = Flask(__name__)
 app.config.from_envvar('NOODLZ_SETTINGS')
+app.config['RE_USER'] = re.compile(app.config.get('RE_USER', '^[A-Za-z_][A-Za-z0-9-_]{,31}$'))
 db = SQLAlchemy(app)
 
 
@@ -113,8 +113,8 @@ def require_user(f):
 
 @app.route("/login/", methods=['POST'])
 def login():
-	if not RE_USER.match(request.form["user"]):
-		abort(400, "Invalid username. Start with a letter, continue alphanumeric, length between 1 and 32 characters.")
+	if not app.cpnfig['RE_USER'].match(request.form["user"]):
+		abort(400, "Invalid username.")
 	user = User.query.filter_by(name=request.form["user"]).first()
 	if user is None:  # or not passlib.hash.bcrypt.verify(request.form["pass"], user.pass_hash):
 		abort(403, "Invalid username or password")
