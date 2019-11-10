@@ -111,9 +111,47 @@ def item_add(args):
 	print(f"Item id: {item.id}")
 
 
+def _item_remove(item):
+	if item is None:
+		print("No such item.")
+		return
+	orders = Order.query.filter_by(item=item).filter(Order.trip.has(closed=False)).all()
+	if len(orders) > 0:
+		print("There are outstanding orders with this item:")
+		for o in orders:
+			_print_order(o)
+		return
+	item.historical = True
+	db.session.add(item)
 
+def item_remove(args):
+	item = Item.query.filter_by(id=args.item_id).first()
+	_item_remove(item)
 	db.session.commit()
 
+
+def item_modify(args):
+	item = Item.query.filter_by(id=args.item_id).first()
+	if item is None:
+		print("No such item.")
+		return
+	if args.name:
+		item.name = args.name
+	if args.tag:
+		item.tag = args.tag
+	if args.remove_tag:
+		item.tag = None
+	db.session.add(item)
+	db.session.commit()
+
+
+def item_reprice(args):
+	item = Item.query.filter_by(id=args.item_id).first()
+	was_historical = item.historical
+	_item_remove(item)
+	item_new = Item(name=item.name, tag=item.tag, price=args.price, destination=item.destination, historical=was_historical)
+	db.session.add(item)
+	db.session.commit()
 
 
 def order_list(args):
@@ -167,6 +205,24 @@ def main():
 	ap_item_add.add_argument('--tag', default=None)
 	ap_item_add.set_defaults(func=item_add)
 
+	# Item Modify
+	ap_item_modify = ap_item_commands.add_parser('modify', help="It is not allowed to change an existing item's associated destination, or its price, as that would confuse past orders.")
+	ap_item_modify.add_argument('item_id', type=int)
+	ap_item_modify.add_argument('--name', default=None)
+	ap_item_modify.add_argument('--tag', default=None)
+	ap_item_modify.add_argument('--remove_tag', action='store_true', default=False)
+	ap_item_modify.set_defaults(func=item_modify)
+
+	# Item Reprice
+	ap_item_reprice = ap_item_commands.add_parser('reprice', help="Note that this will only mark the item as historical, and create a new item with all properties equal except the new price.")
+	ap_item_reprice.add_argument('item_id', type=int)
+	ap_item_reprice.add_argument('price', type=decimal.Decimal)
+	ap_item_reprice.set_defaults(func=item_reprice)
+
+	# Item Remove
+	ap_item_remove = ap_item_commands.add_parser('remove', help="An item can only be removed if there are no open orders of it (else the user would be unable to remove their order) and that the item is only marked 'historical' and will be unorderable in future trips. Past, closed trips remain unaffected.")
+	ap_item_remove.add_argument('item_id', type=int)
+	ap_item_remove.set_defaults(func=item_remove)
 
 	# Trip
 	ap_trip = ap_commands.add_parser('trip')
