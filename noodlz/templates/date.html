@@ -12,7 +12,9 @@
 		<section class="header">
 			<header>
 				<h1>Developer Monday</h1>
+				<form><button class="subtle" formmethod="GET" formaction="{{ url_for('date_show', date=prev_date) }}" type="submit" title="Previous Date"><i class="fas fa-xs fa-arrow-left"></i></button></form>
 				<span class="date">{{ date }}</span>
+				<form><button class="subtle" formmethod="GET" formaction="{{ url_for('date_show', date=next_date) }}" type="submit" title="Next Date"><i class="fas fa-xs fa-arrow-right"></i></button></form>
 				<div class="right">
 					<span class="user">{{ user.name }}</span>
 					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Settle"><i class="fas fa-money-bill-wave"></i></button></form>

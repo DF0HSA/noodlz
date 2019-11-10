@@ -56,6 +56,12 @@ button {
 	border-radius: 0.5ex;
 	box-shadow: 0px 0px 2px 1px var(--main-300);
 }
+button.subtle {
+	background-color: transparent;
+	border: none;
+	color: var(--main-500);
+	box-shadow: none;
+}
 button:active {
 	background-color: var(--accent-900);
 	border-color: var(--accent-400);

@@ -148,6 +148,8 @@ def date_show(date):
 		**GLOBAL_PARAMS,
 		user=g.user,
 		date=date,
+		next_date=date + datetime.timedelta(days=7),
+		prev_date=date + datetime.timedelta(days=-7),
 		trips=trips,
 		destinations=destinations,
 		msg=request.args.get("msg"),
