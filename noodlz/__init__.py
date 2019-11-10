@@ -32,9 +32,10 @@ class Destination(db.Model):
 
 class Item(db.Model):
 	id = db.Column(db.Integer, primary_key=True)
-	name = db.Column(db.Text(), unique=True, nullable=False)
+	name = db.Column(db.Text(), nullable=False)
 	tag = db.Column(db.String(16), default=None, nullable=True)
 	price = db.Column(db.Numeric(9, scale=2), nullable=False)
+	historical = db.Column(db.Boolean(), default=False, nullable=False)
 	destination_id = db.Column(db.Integer, db.ForeignKey('destination.id'))
 	destination = db.relationship('Destination', backref=db.backref('items', lazy=True))
 
@@ -177,6 +178,8 @@ def trip_submit_order(trip_id):
 			continue
 		item_id = item_id.replace("item-", "", 1)
 		item = Item.query.filter_by(id=item_id).first()
+		if item.historical and count != 0:
+			abort(400, "That item is not orderable any more.")
 
 		count = int(count)
 		if count > int(app.config.get('MAX_ORDER_COUNT', 16)):

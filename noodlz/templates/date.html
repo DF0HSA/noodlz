@@ -43,7 +43,7 @@
 			</header>
 			<form>
 				<div class="orders">
-				{% for item in trip.destination.items %}
+				{% for item in trip.destination.items if not item.historical or trip.closed %}
 					<div class="order">
 					{% if item.tag %}
 						<span class="id">{{ item.tag }}</span>
