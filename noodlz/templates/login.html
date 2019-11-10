@@ -25,10 +25,25 @@
 				</div>
 				<footer>
 					<div class="right">
-						<button type="submit" value="Continue" /><i class="fas fa-fw fa-sign-in-alt"></i> Sign In</button>
+						<span class="note">By signing in you agree to the <a href="/terms">Terms</a></span><button type="submit" value="Continue" /><i class="fas fa-fw fa-sign-in-alt"></i> Sign In</button>
 					</div>
 				</footer>
 			</form>
+		</section>
+		<section>
+			<header>
+				<h1>New in Noodlz {{ version }}</h1>
+			</header>
+			<article>
+				<ul>
+					<li><span class="badge new">NEW</span> Username constraints are now configurable</li>
+					<li><span class="badge fix">FIX</span> Place the Terms more prominently on the login page</li>
+					<li><span class="badge fix">FIX</span> Prevent a certain person from ordering 65535 drinks again</li>
+				</ul>
+			</article>
+			<footer>
+				<small><p><a href="https://github.com/df0hsa/noodlz/tag/v{{version}}">Source</a></p></small>
+			</footer>
 		</section>
 		{% include '_footer.html' %}
 	</div>

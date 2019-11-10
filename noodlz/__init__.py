@@ -11,8 +11,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy.exc
 import passlib.hash
 
-__version__ = "2.0.1"
-
+__version__ = "2.1.0"
 
 app = Flask(__name__)
 app.config.from_envvar('NOODLZ_SETTINGS')

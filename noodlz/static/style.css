@@ -120,7 +120,7 @@ div.orders {
 	display: flex;
 	flex-direction: column;
 }
-div.order {
+div.order, article {
 	margin: 0.5px 0;
 	padding-left: 1ex;
 	background-color: white;
@@ -131,7 +131,7 @@ section.trip.closed div.order {
 section.trip.closed div.order.zero {
 	display: none;
 }
-ul li {
+ul li, span.badge {
 	display: inline-block;
 	border-radius: 1.6ex;
 	padding: 0.3ex 1.2ex;
@@ -143,6 +143,15 @@ ul.options li {
 ul.users li {
 	background: var(--accent-900);
 	color: var(--main-50);
+}
+span.badge.new {
+	background: var(--accent-200);
+}
+span.badge.fix {
+	background: var(--accent-100);
+}
+span.badge.tag {
+	background: var(--main-100);
 }
 div.right {
 	margin-left: auto;
