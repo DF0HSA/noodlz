@@ -14,15 +14,13 @@ source=("git+https://github.com/df0hsa/noodlz.git"
         "noodlz.install"
         "noodlz.service"
         "noodlz.sysusers"
-        "noodlz.tmpfiles"
 )
 
 sha512sums=('SKIP'
             'a8296a7a1d17bc39c128fba05a0d2b9d5e6262fe473aee9cd6e47ba3bd987375444f2bd9ff1a35cd77234a4869f242f1e3e79943ee92115247c9096ced09c812'
             'ecaed1da7aee28fd4c4f1cb60580aed35adf1304dd9097afd3c5cc5f837563a03fbcec457bdb6dd27cafce4eae7041830c83a1b3fb4c584ead08c14e1e56ca83'
             '212c96b2cbe203eab14d5f236fb1f6c82da9d95150962c491d4beedf9568c8be56073160e46f501282f39c1fbc34685fdfc4c850d40386138f4e6ac9aafd7383'
-            'dd7e05467eb00910f0e187a01cd87e1d1477ce531b59fd36a82ebfc67ab6fbea8e0f32a7a6b43305fc6f2d73ba989e212949cb41227c866cce09e086509232c3'
-            'aaebcb150c2ab29d7789f7354dc01463a5bc5de50952ddee308a2207369c5d868054bfddee347b330f1c5bdf7c17d22e1527bc530cd5a7522e926703b031f9d5')
+            'dd7e05467eb00910f0e187a01cd87e1d1477ce531b59fd36a82ebfc67ab6fbea8e0f32a7a6b43305fc6f2d73ba989e212949cb41227c866cce09e086509232c3')
 
 pkgver() {
     sed -n 's/__version__\s\+=\s\+"\([^"]\+\)"/\1/p' "noodlz/noodlz/__init__.py"
@@ -34,5 +32,4 @@ package() {
     install -Dm400 "${srcdir}/noodlz.cfg" "${pkgdir}/etc/noodlz.cfg"
     install -Dm644 "${srcdir}/noodlz.service" "${pkgdir}/usr/lib/systemd/system/noodlz.service"
     install -Dm644 "${srcdir}/noodlz.sysusers" "${pkgdir}/usr/lib/sysusers.d/noodlz.conf"
-    install -Dm644 "${srcdir}/noodlz.tmpfiles" "${pkgdir}/usr/lib/tmpfiles.d/noodlz.conf"
 }

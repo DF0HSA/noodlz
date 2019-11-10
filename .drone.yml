@@ -1,0 +1,36 @@
+kind: pipeline
+name: default
+
+steps:
+- name: makepkg
+  image: docker-registry.tobyp.net/tobyp/docker-drone-makepkg
+  environment:
+    PKGBUILD_DIR: contrib/aur
+    PKGBUILD_SRC_OVERRIDE: "git+https://github.com/df0hsa/noodlz.git"
+
+- name: repo
+  image: docker-registry.tobyp.net/tobyp/docker-drone-pacman-package-deploy
+  when:
+    event:
+      - promote
+  environment:
+    PKGBUILD_DIR: contrib/aur
+    GNUPGHOME: /gnupg
+    PACKAGE_SIGNING_KEY: {from_secret: "PACMAN_REPO_KEY"}
+    REPO: {from_secret: "PACMAN_REPO_NAME"}
+  volumes:
+    - name: repo
+      path: /repo
+    - name: gnupg
+      path: /gnupg
+
+volumes:
+- name: repo
+  host:
+    path: /var/pacman-repository
+- name: gnupg
+  host:
+    path: /var/pacman-repository-gnupg
+ 
+image_pull_secrets:
+- DOCKER_PULL_SECRET
