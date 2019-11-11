@@ -1,23 +1,25 @@
 import datetime
 import functools
-import json
+import os
 import re
-import os.path
 
 from flask import Flask
 from flask import url_for, redirect, render_template, abort
 from flask import session, request, g
 from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy.exc
-import passlib.hash
+# import passlib.hash
 
 __version__ = "2.1.0"
 
+
 app = Flask(__name__)
-app.config.from_envvar('NOODLZ_SETTINGS')
+# setup.py imports __version__ from this module, but it won't have NOODLZ_SETTINGS set. NOODLZ_SETTINGS_IGNORE gives us a workaround for CI.
+if 'NOODLZ_SETTINGS' in os.environ or 'NOODLZ_SETTINGS_IGNORE' not in os.environ:
+	app.config.from_envvar('NOODLZ_SETTINGS')
 app.config['RE_USER'] = re.compile(app.config.get('RE_USER', '^[A-Za-z_][A-Za-z0-9-_]{,31}$'))
 db = SQLAlchemy(app)
-GLOBAL_PARAMS={'version': __version__}
+GLOBAL_PARAMS = {'version': __version__}
 
 
 class User(db.Model):
@@ -246,7 +248,8 @@ def settle_show():
 		**GLOBAL_PARAMS,
 		user=g.user,
 		outgoing=outgoing,
-		incoming=incoming)
+		incoming=incoming
+	)
 
 
 @app.route("/settle", methods=["POST"])

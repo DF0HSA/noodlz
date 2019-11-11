@@ -1,3 +1,5 @@
+import os
+os.environ['NOODLZ_SETTINGS_IGNORE']="true"
 from noodlz import __version__
 from setuptools import setup, find_packages
 
