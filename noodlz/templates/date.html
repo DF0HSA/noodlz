@@ -17,7 +17,7 @@
 				<form><button class="subtle" formmethod="GET" formaction="{{ url_for('date_show', date=next_date) }}" type="submit" title="Next Date"><i class="fas fa-xs fa-arrow-right"></i></button></form>
 				<div class="right">
 					<span class="user">{{ user.name }}</span>
-					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Settle"><i class="fas fa-money-bill-wave"></i></button></form>
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Settle"><i class="fas fa-money-bill-wave"></i></button><input type="hidden" name="settled" value="false" /></form>
 					<form><button formmethod="POST" formaction="{{ url_for('logout', redirect=url_for('date_show', date=date)) }}" type="submit" title="Logout"><i class="fas fa-sign-out-alt"></i></button></form>
 				</div>
 			</header>
@@ -34,10 +34,10 @@
 				<span class="person">{{ trip.user.name }}</span>
 				<div class="right">
 					{% if trip.user == user %}
-					<form><button formmethod="GET" formaction="{{ url_for('trip_show', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i>List</button></form>
+					<form><button formmethod="GET" formaction="{{ url_for('trip_show', trip_id=trip.id) }}" title="List"><i class="fas fa-fw fa-shopping-cart"></i><span>List</span></button></form>
 					{% endif %}
 					{% if trip.user == user and not trip.closed %}
-					<form><button formmethod="POST" formaction="{{ url_for('trip_close', trip_id=trip.id) }}" title="Close"><i class="fas fa-fw fa-shopping-cart"></i>Close</button></form>
+					<form><button formmethod="POST" formaction="{{ url_for('trip_close', trip_id=trip.id) }}" title="Close"><i class="fas fa-fw fa-shopping-cart"></i><span>Close</span></button></form>
 					{% endif %}
 				</div>
 			</header>
@@ -69,7 +69,7 @@
 					{% if trip.closed %}
 						<span class="note"><i class="fas fa-fw fa-lock"></i> This trip is closed.</span>
 					{% else %}
-						<button type="submit" formmethod="POST" formaction="{{ url_for('trip_submit_order', trip_id=trip.id) }}" title="Order"><i class="fas fa-fw fa-check"></i>Order</button>
+						<button type="submit" formmethod="POST" formaction="{{ url_for('trip_submit_order', trip_id=trip.id) }}" title="Order"><i class="fas fa-fw fa-check"></i><span>Order</span></button>
 					{% endif %}
 					</div>
 				</footer>
@@ -91,7 +91,7 @@
 					{% endfor %}
 					</select>
 					<div class="right">
-						<button type="submit" formmethod="POST" formaction="{{ url_for('date_submit_trip', date=date) }}" value="Add Trip"><i class="fas fa-fw fa-plus"></i>Add Trip</button>
+						<button type="submit" formmethod="POST" formaction="{{ url_for('date_submit_trip', date=date) }}" value="Add Trip"><i class="fas fa-fw fa-plus"></i><span>Add Trip</span></button>
 					</div>
 				</footer>
 			</form>

@@ -27,6 +27,9 @@ span,ul,h1,h2,input,button,p {
 	display: inline-block;
 	margin: 0.5ex;
 }
+button > span {
+	margin: 0;
+}
 h1 {
 	font-size: 1.2em;
 	margin-left: 1ex;
@@ -36,6 +39,9 @@ h2 {
 }
 span.id, span.note, span.date, span.person, span.price {
 	color: var(--main-500);
+}
+div.order span.date {
+	font-size: 75%;
 }
 span.id {
 	font-family: monospace;
@@ -181,8 +187,8 @@ input[type="checkbox"] {
 	margin-left: -1ex;
 	margin-right: -1ex;
 }
-i.fa-fw {
-	margin-right: 0.5ex;
+i.fa-fw + span{
+	margin-left: 0.5ex;
 }
 
 @media only screen and (max-width: 600px) {

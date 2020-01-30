@@ -22,6 +22,11 @@
 		<section>
 			<header>
 				<h2 class="user">{{ user.name }} owes people</h2>
+				<div class="right">
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Show settled"><i class="fas fa-fw fa-check"></i></button><input type="hidden" name="settled" value="true" /></form>
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Show all"><i class="fas fa-fw fa-asterisk"></i></button></form>
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Show unsettled"><i class="fas fa-fw fa-times"></i></button><input type="hidden" name="settled" value="false" /></form>
+				</div>
 			</header>
 			<form>
 				<div class="orders">
@@ -32,16 +37,14 @@
 							{% if not order.settled %}
 								{% set ns_outgoing.total = ns_outgoing.total + order.item.price %}
 							{% endif %}
-							{% if order.item.tag %}
-							<span class="date"><a href="/{{ order.trip.date }}">{{ order.trip.date }}</a></span>
-							{% endif %}
-							<span class="item">{{ order.item.name.split(";")[0] }}</span>
+							<a href="{{ url_for('settle_show', trip=order.trip.id) }}"><span class="date">{{ order.trip.date }}</span></a>
+							<a href="/{{ order.trip.date }}"><span class="item">{{ order.item.name.split(";")[0] }}</span></a>
 							<ul class="options">{% for option in order.item.name.split(";")[1:] %}
 								<li>{{ option }}</li>
 							{% endfor %}</ul>
 							<div class="right">
 								<ul class="users">
-									<li class="user">{{ order.trip.user.name }}</li>
+									<a href="{{ url_for('settle_show', with=order.trip.user.id) }}"><li class="user">{{ order.trip.user.name }}</li></a>
 								</ul>
 								<span class="price">&euro; {{ "%.2f"|format(order.item.price) }}</span>
 								<input type="checkbox" disabled {% if order.settled %}checked{% endif %}/>
@@ -53,13 +56,18 @@
 			</form>
 			<footer>
 				<div class="right">
-					<span class="note">Bring &euro; {{ "%.2f"|format(ns_outgoing.total) }}</span>
+					<span class="note">Bring &euro; {{ "%.2f"|format(ns_outgoing.total) }}{% if filtered %} (Note: Only the visible items are included){% endif %}</span>
 				</div>
 			</footer>
 		</section>
 		<section>
 			<header>
 				<h2 class="user">People owe {{ user.name }}</h2>
+				<div class="right">
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Show settled"><i class="fas fa-fw fa-check"></i></button><input type="hidden" name="settled" value="true" /></form>
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Show all"><i class="fas fa-fw fa-asterisk"></i></button></form>
+					<form><button formmethod="GET" formaction="{{ url_for('settle_show') }}" type="submit" title="Show unsettled"><i class="fas fa-fw fa-times"></i></button><input type="hidden" name="settled" value="false" /></form>
+				</div>
 			</header>
 			<form>
 				<div class="orders">
@@ -70,16 +78,14 @@
 							{% if not order.settled %}
 								{% set ns_incoming.total = ns_incoming.total + order.item.price %}
 							{% endif %}
-							{% if order.item.tag %}
-							<span class="date"><a href="/{{ order.trip.date }}">{{ order.trip.date }}</a></span>
-							{% endif %}
-							<span class="item">{{ order.item.name.split(";")[0] }}</span>
+							<a href="{{ url_for('settle_show', trip=order.trip.id) }}"><span class="date">{{ order.trip.date }}</span></a>
+							<a href="/{{ order.trip.date }}"><span class="item">{{ order.item.name.split(";")[0] }}</span></a>
 							<ul class="options">{% for option in order.item.name.split(";")[1:] %}
 								<li>{{ option }}</li>
 							{% endfor %}</ul>
 							<div class="right">
 								<ul class="users">
-									<li class="user">{{ order.user.name }}</li>
+									<a href="{{ url_for('settle_show', with=order.user.id) }}"><li class="user">{{ order.user.name }}</li></a>
 								</ul>
 								<span class="price">&euro; {{ "%.2f"|format(order.item.price) }}</span>
 								<input type="checkbox" name="order-{{ order.id }}" {% if order.settled %}checked{% endif %}/>
@@ -90,8 +96,8 @@
 				</div>
 				<footer>
 					<div class="right">
-						<span class="note">Owed &euro; {{ "%.2f"|format(ns_incoming.total) }}</span>
-						<button type="submit" formmethod="POST" formaction="" title="Save"><i class="fas fa-fw fa-check"></i>Save</button>
+						<span class="note">Owed &euro; {{ "%.2f"|format(ns_incoming.total) }}{% if filtered %} (Note: Only the visible items are included){% endif %}</span>
+						<button type="submit" formmethod="POST" formaction="" title="Save"><i class="fas fa-fw fa-check"></i><span>Save</span></button>
 					</div>
 				</footer>
 			</form>

@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy.exc
 # import passlib.hash
 
-__version__ = "2.1.0"
+__version__ = "2.1.1"
 
 
 app = Flask(__name__)
@@ -77,6 +77,14 @@ class Order(db.Model):
 
 def parse_date(date_str):
 	return datetime.datetime.strptime(date_str, '%Y-%m-%d').date()
+
+
+def parse_bool(b):
+	if b in (True, 1, 'true', 'yes', 'on', '1'):
+		return True
+	elif b in (False, 0, 'false', 'no', 'off', '0'):
+		return False
+	raise ValueError("Not a valid boolean")
 
 
 def now():
@@ -239,16 +247,49 @@ def trip_show(trip_id):
 @require_user
 def settle_show():
 	# All orders that were ordered by us, but not bought by us
-	outgoing = db.session.query(Order).filter(Order.user == g.user, Order.trip.has(Trip.user != g.user)).all()
-
+	query_out = db.session.query(Order).filter(Order.user == g.user, Order.trip.has(Trip.user != g.user))
 	# All orders that were not ordered by us, but were bought by us
-	incoming = db.session.query(Order).filter(Order.user != g.user, Order.trip.has(Trip.user == g.user)).all()
+	query_in = db.session.query(Order).filter(Order.user != g.user, Order.trip.has(Trip.user == g.user))
+
+	filtered = False
+	if 'trip' in request.args:
+		query_out = query_out.filter(Order.trip_id.in_(request.args.getlist('trip')))
+		query_in = query_in.filter(Order.trip_id.in_(request.args.getlist('trip')))
+		filtered = True
+	for after in request.args.getlist('after'):
+		query_out = query_out.filter(Order.date > after)
+		query_in = query_in.filter(Order.date > after)
+		filtered = True
+	for since in request.args.getlist('since'):
+		query_out = query_out.filter(Order.date >= since)
+		query_in = query_in.filter(Order.date >= since)
+		filtered = True
+	for before in request.args.getlist('before'):
+		query_out = query_out.filter(Order.date < before)
+		query_in = query_in.filter(Order.date < before)
+		filtered = True
+	for until in request.args.getlist('until'):
+		query_out = query_out.filter(Order.date <= until)
+		query_in = query_in.filter(Order.date <= until)
+		filtered = True
+	if 'with' in request.args:
+		# for outgoing (ordered by us), check the Trip's user
+		query_out = query_out.filter(Order.trip.has(Trip.user_id.in_(map(int, request.args.getlist('with')))))
+		# For incoming (ordered from us), check the Order's user
+		query_in = query_in.filter(Order.user_id.in_(map(int, request.args.getlist('with'))))
+		filtered = True
+	if 'settled' in request.args:
+		filter_settled = parse_bool(request.args['settled'])
+		query_out = query_out.filter(Order.settled == filter_settled)
+		query_in = query_in.filter(Order.settled == filter_settled)
+		filtered = True
 
 	return render_template("settle.html",
 		**GLOBAL_PARAMS,
 		user=g.user,
-		outgoing=outgoing,
-		incoming=incoming
+		outgoing=query_out.all(),
+		incoming=query_in.all(),
+		filtered=filtered,
 	)
 
 
