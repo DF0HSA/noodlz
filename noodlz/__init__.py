@@ -10,7 +10,7 @@ from flask_sqlalchemy import SQLAlchemy
 import sqlalchemy.exc
 # import passlib.hash
 
-__version__ = "2.1.1"
+__version__ = "2.1.2"
 
 
 app = Flask(__name__)
@@ -296,11 +296,16 @@ def settle_show():
 @app.route("/settle", methods=["POST"])
 @require_user
 def settle_update():
-	incoming = db.session.query(Order).filter(Order.user != g.user, Order.trip.has(Trip.user == g.user)).all()
 	form = request.form.to_dict()
-	for order in incoming:
-		new_state = form.get(f"order-{order.id}", "off") == "on"
-		if new_state != order.settled:
+	orders_form = {}
+	for key, value in form.items():
+		if key.startswith("old-"):
+			order_id = int(key.replace("old-", "", 1))
+			orders_form[order_id] = (value == "on", form.get(f"order-{order_id}", "off") == "on")
+	orders_db = db.session.query(Order).filter(Order.id.in_(orders_form)).all()
+	for order in orders_db:
+		old_state, new_state = orders_form[order.id]
+		if new_state != old_state:
 			order.settled = new_state
 			db.session.add(order)
 	db.session.commit()

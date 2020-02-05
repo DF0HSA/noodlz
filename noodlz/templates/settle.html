@@ -89,6 +89,7 @@
 								</ul>
 								<span class="price">&euro; {{ "%.2f"|format(order.item.price) }}</span>
 								<input type="checkbox" name="order-{{ order.id }}" {% if order.settled %}checked{% endif %}/>
+								<input type="hidden" name="old-{{ order.id }}" value="{% if order.settled %}on{% else %}off{% endif %}"/>
 							</div>
 						</div>
 						{% endif %}
