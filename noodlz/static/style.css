@@ -85,6 +85,10 @@ div.login input {
 div.order input {
 	width: 3em;
 }
+div.order input[type="checkbox"] {
+	width: inherit;
+	margin: 0.5ex 0.75em;
+}
 footer select {
 	background-color: white;
 	flex: 1;
